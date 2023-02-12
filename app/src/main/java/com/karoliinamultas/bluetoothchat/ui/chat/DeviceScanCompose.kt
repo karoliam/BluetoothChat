@@ -1,6 +1,7 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.graphics.drawable.shapes.Shape
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,22 +10,34 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.states.DeviceScanViewState
+import com.karoliinamultas.bluetoothchat.ui.theme.Pink40
+import kotlin.math.round
 
 
 private const val TAG = "DeviceScanCompose"
 
 object DeviceScanCompose {
+
     @SuppressLint("MissingPermission")
     @Composable
     fun ShowDevices(
@@ -39,13 +52,13 @@ object DeviceScanCompose {
             itemsIndexed(scanResults.keys.toList()) { _, key ->
                 Column {
                     Column(
-                        modifier = Modifier.clickable {
-                            val device: BluetoothDevice? = scanResults.get(key = key)
-                            onClick(device)
-                        }
-                            .background(Color.LightGray, shape = RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .clickable {
+                                val device: BluetoothDevice? = scanResults.get(key = key)
+                                onClick(device)
+                            }
+                            .background(color = Pink40, shape = RoundedCornerShape(10.dp))
                             .fillMaxWidth()
-                            .border(1.dp, Color.Black, shape = RoundedCornerShape(10.dp))
                             .padding(5.dp)
                     ) {
                         Text(
@@ -99,4 +112,5 @@ object DeviceScanCompose {
             }
         }
     }
+
 }

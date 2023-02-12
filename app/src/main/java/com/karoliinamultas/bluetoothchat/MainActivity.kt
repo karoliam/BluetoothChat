@@ -11,15 +11,23 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
@@ -28,6 +36,7 @@ import com.karoliinamultas.bluetoothchat.ui.chat.ChatCompose
 import com.karoliinamultas.bluetoothchat.ui.chat.DeviceScanCompose
 import com.karoliinamultas.bluetoothchat.ui.chat.DeviceScanViewModel
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
+import com.karoliinamultas.bluetoothchat.ui.theme.Pink40
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -45,7 +54,6 @@ class MainActivity : ComponentActivity() {
         ChatServer.stopServer()
     }
 
-    @SuppressLint("MissingPermission")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,41 +102,73 @@ class MainActivity : ComponentActivity() {
                 }
                     Surface(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp),
+                            .fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val deviceScanningState by viewModel.viewState.observeAsState()
 
                         val deviceConnectionState by ChatServer.deviceConnection.observeAsState()
 
-                        var isChatOpen by remember {
-                            mutableStateOf(false)
-                        }
+                        var isChatOpen by remember {mutableStateOf(false)}
+                        Scaffold(
+                            topBar = {
+                                CenterAlignedTopAppBar(
+                                    title = {
+                                        Text(
+                                            "Restroom Chat",
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                            navigationIcon = {
+                                        IconButton(onClick = { /* doSomething() */ }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.ArrowBack,
+                                                contentDescription = "Localized description"
+                                            )
+                                        }
+                                    },
+                                    actions = {
+                                        IconButton(onClick = { /* doSomething() */ }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Menu,
+                                                contentDescription = "Localized description"
+                                            )
+                                        }
+                                    },
+                                )
+                            },
+                            content = { innerPadding ->
+                                Box(
+                                    contentAlignment = Alignment.TopCenter,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(innerPadding)
+                                ) {
+                                    if (deviceScanningState != null && !isChatOpen || deviceConnectionState == DeviceConnectionState.Disconnected) {
+                                        Column (){
+                                            Text(
+                                                text = "Choose a chat to join",
+                                                modifier = Modifier
+                                                    .padding(30.dp)
+                                                    .align(alignment = CenterHorizontally),
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            DeviceScanCompose.DeviceScan(deviceScanViewState = deviceScanningState!!) {
+                                                isChatOpen = true
+                                            }
+                                        }
 
-                        Box(
-                            contentAlignment = Alignment.TopCenter,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (deviceScanningState != null && !isChatOpen || deviceConnectionState == DeviceConnectionState.Disconnected) {
-                                Column {
-                                    Text(
-                                        text = "Choose a device to chat with:",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    DeviceScanCompose.DeviceScan(deviceScanViewState = deviceScanningState!!) {
-                                        isChatOpen = true
+                                    } else if (deviceScanningState != null && deviceConnectionState is DeviceConnectionState.Connected) {
+                                        ChatCompose.Chats((deviceConnectionState as DeviceConnectionState.Connected).device.name)
+                                    } else {
+                                        Text(text = "Nothing")
                                     }
                                 }
-
-                            } else if (deviceScanningState != null && deviceConnectionState is DeviceConnectionState.Connected) {
-                                ChatCompose.Chats((deviceConnectionState as DeviceConnectionState.Connected).device.name)
-                            } else {
-                                Text(text = "Nothing")
                             }
-                        }
+                        )
                     }
                 }
             }
