@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.states.DeviceScanViewState
-import com.karoliinamultas.bluetoothchat.ui.theme.Pink40
 import kotlin.math.round
 
 
@@ -57,7 +56,7 @@ object DeviceScanCompose {
                                 val device: BluetoothDevice? = scanResults.get(key = key)
                                 onClick(device)
                             }
-                            .background(color = Pink40, shape = RoundedCornerShape(10.dp))
+                            .background(color = MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(10.dp))
                             .fillMaxWidth()
                             .padding(5.dp)
                     ) {

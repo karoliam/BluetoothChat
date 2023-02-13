@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.models.Message
-import com.karoliinamultas.bluetoothchat.ui.theme.Pink40
 
 
 private const val TAG = "ChatCompose"
@@ -51,12 +50,12 @@ object ChatCompose {
                     .border(1.dp, Color.Black, shape = RoundedCornerShape(10.dp))
                     .background(
                         if (message is Message.RemoteMessage) Color(0xFFD3D3D3) else Color(
-                            0xFF90EE90
+                            0xFFFFDD0
                         ),
                         shape = RoundedCornerShape(10.dp)
                     )
             ) {
-                Text(text = message.text, color = Color.Black, modifier = Modifier.padding(10.dp))
+                Text(text = message.text, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(10.dp))
             }
         }
     }
@@ -79,16 +78,8 @@ object ChatCompose {
 
         if (messageList.isNotEmpty()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = "Chat Now with ${deviceName ?: "Unknown"}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
                 Surface(modifier = Modifier
-                    .padding(all = Dp(5f))
-                    .fillMaxHeight(fraction = 0.85f)) {
+                    .fillMaxHeight(fraction = 0.89f)) {
                     ChatsList(messageList)
                 }
 
@@ -99,7 +90,7 @@ object ChatCompose {
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize(fraction = 0.85f)
+                    modifier = Modifier.fillMaxSize(fraction = 0.89f)
                 ) {
                     Text(text = "No Chat History")
                 }
@@ -112,17 +103,17 @@ object ChatCompose {
     @Composable
     fun InputField(inputvalue: MutableState<TextFieldValue>) {
         val focusManager = LocalFocusManager.current
-        Box(Modifier.fillMaxSize().background(color = Pink40.copy(alpha = 0.5f))) {
+        Box(Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))) {
             Row(
                 Modifier
-                    .padding(10.dp)
+                    .padding(5.dp)
             ) {
                 TextField(
                     value = inputvalue.value,
                     onValueChange = {
                         inputvalue.value = it
                     },
-                    Modifier.width(250.dp).padding(5.dp),
+                    Modifier.width(265.dp).padding(5.dp),
                     shape = RoundedCornerShape(5.dp),
                     placeholder = { Text(text = "Enter your message") },
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

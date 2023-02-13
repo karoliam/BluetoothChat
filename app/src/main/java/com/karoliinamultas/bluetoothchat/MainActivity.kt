@@ -36,7 +36,6 @@ import com.karoliinamultas.bluetoothchat.ui.chat.ChatCompose
 import com.karoliinamultas.bluetoothchat.ui.chat.DeviceScanCompose
 import com.karoliinamultas.bluetoothchat.ui.chat.DeviceScanViewModel
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
-import com.karoliinamultas.bluetoothchat.ui.theme.Pink40
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -113,6 +112,12 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             topBar = {
                                 CenterAlignedTopAppBar(
+                                    colors = TopAppBarDefaults.smallTopAppBarColors(
+                                        containerColor = Color.White,
+                                        titleContentColor = Color.Black,
+                                        navigationIconContentColor = Color.Black,
+                                        actionIconContentColor = Color.Black
+                                    ),
                                     title = {
                                         Text(
                                             "Restroom Chat",
