@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
                             topBar = {
                                 CenterAlignedTopAppBar(
                                     colors = TopAppBarDefaults.smallTopAppBarColors(
-                                        containerColor = Color.White,
+                                        containerColor = MaterialTheme.colorScheme.primary,
                                         titleContentColor = Color.Black,
                                         navigationIconContentColor = Color.Black,
                                         actionIconContentColor = Color.Black
@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                     },
                                             navigationIcon = {
-                                        IconButton(onClick = { /* doSomething() */ }) {
+                                        IconButton(onClick = { isChatOpen = false }) {
                                             Icon(
                                                 imageVector = Icons.Filled.ArrowBack,
                                                 contentDescription = "Localized description"

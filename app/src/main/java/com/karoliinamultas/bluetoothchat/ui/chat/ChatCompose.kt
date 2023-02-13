@@ -148,7 +148,8 @@ object ChatCompose {
                         .height(60.dp)
                         .width(80.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    shape = RoundedCornerShape(5.dp)
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondaryContainer)
                 ) {
                     Text(text = "Send", fontSize = 13.sp)
                 }
