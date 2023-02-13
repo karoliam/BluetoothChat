@@ -35,6 +35,7 @@ private const val TAG = "ChatCompose"
 
 object ChatCompose {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ShowChat(message: Message) {
         Row(
@@ -43,17 +44,16 @@ object ChatCompose {
                 .fillMaxWidth(),
             horizontalArrangement = if (message is Message.RemoteMessage) Arrangement.Start else Arrangement.End
         ) {
-            Box(
+            Card(
                 modifier = Modifier
                     .width(150.dp)
                     .padding(5.dp)
-                    .border(1.dp, Color.Black, shape = RoundedCornerShape(10.dp))
                     .background(
                         if (message is Message.RemoteMessage) Color(0xFFD3D3D3) else Color(
                             0xFFFFDD0
                         ),
-                        shape = RoundedCornerShape(10.dp)
-                    )
+                    ),
+                elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Text(text = message.text, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(10.dp))
             }
@@ -103,7 +103,10 @@ object ChatCompose {
     @Composable
     fun InputField(inputvalue: MutableState<TextFieldValue>) {
         val focusManager = LocalFocusManager.current
-        Box(Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))) {
             Row(
                 Modifier
                     .padding(5.dp)
@@ -113,7 +116,9 @@ object ChatCompose {
                     onValueChange = {
                         inputvalue.value = it
                     },
-                    Modifier.width(265.dp).padding(5.dp),
+                    Modifier
+                        .width(265.dp)
+                        .padding(5.dp),
                     shape = RoundedCornerShape(5.dp),
                     placeholder = { Text(text = "Enter your message") },
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -139,7 +144,10 @@ object ChatCompose {
                             inputvalue.value = TextFieldValue()
                         }
                     },
-                    modifier = Modifier.height(60.dp).width(80.dp).padding(0.dp, 6.dp, 0.dp, 0.dp),
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(80.dp)
+                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
                     shape = RoundedCornerShape(5.dp)
                 ) {
                     Text(text = "Send", fontSize = 13.sp)
