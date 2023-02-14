@@ -4,10 +4,14 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
@@ -15,14 +19,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -30,7 +34,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.URL
 
 private val REQUEST_CAMERA_PERMISSION = 1
 class ComposeFileProvider : FileProvider(
@@ -56,6 +63,27 @@ class ComposeFileProvider : FileProvider(
 
 }
 
+@Composable
+fun ShowImage(urlText: URL) {
+    var savedBitmap by remember { mutableStateOf(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)) }
+    LaunchedEffect(urlText) {
+        savedBitmap = getImage(urlText)
+    }
+    Image(
+        bitmap = savedBitmap.asImageBitmap(),
+        contentDescription = "image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .size(56.dp)
+    )
+}
+private suspend fun getImage(url: URL): Bitmap =
+    withContext(Dispatchers.IO) {
+        val myConn = url.openStream()
+        return@withContext BitmapFactory.decodeStream(myConn)
+    }
 
 
 @Composable
