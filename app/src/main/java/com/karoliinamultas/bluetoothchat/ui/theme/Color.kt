@@ -33,7 +33,7 @@ val md_theme_light_surfaceTint = Color(0xFFA13B48)
 val md_theme_light_outlineVariant = Color(0xFFD7C1C2)
 val md_theme_light_scrim = Color(0xFF000000)
 
-val md_theme_dark_primary = Color(0xFFFFB2B7)
+val md_theme_dark_primary = Color(0xFF8B635C)
 val md_theme_dark_onPrimary = Color(0xFF630B1D)
 val md_theme_dark_primaryContainer = Color(0xFF822432)
 val md_theme_dark_onPrimaryContainer = Color(0xFFFFDADB)
@@ -63,6 +63,35 @@ val md_theme_dark_shadow = Color(0xFF000000)
 val md_theme_dark_surfaceTint = Color(0xFFFFB2B7)
 val md_theme_dark_outlineVariant = Color(0xFF524344)
 val md_theme_dark_scrim = Color(0xFF000000)
+
+
+//Background ja chattekstit
+//Light
+val bgl1 = Color(0xFFD5DCF9)
+val bgl2 = Color(0xFFEFE6DD)
+val bgl3 = Color(0xFFB7B6C1)
+val bgl4 = Color(0xFFD5CFE1)
+val bgl5 = Color(0xFFEDDFEF)
+
+val tl1 = Color(0xFF00FDDC)
+val tl2 = Color(0xFFFF729F)
+val tl3 = Color(0xFF04E762)
+val tl4 = Color(0xFF208AAE)
+val tl5 = Color(0xFFFF4365)
+
+//Dark
+val bgd1 = Color(0xFF111D4A)
+val bgd2 = Color(0xFF43AA8B)
+val bgd3 = Color(0xFF8B635C)
+val bgd4 = Color(0xFF60594D)
+val bgd5 = Color(0xFF93A29B)
+
+val td1 = Color(0xFFE28413)
+val td2 = Color(0xFF9E2B25)
+val td3 = Color(0xFFD9FFF8)
+val td4 = Color(0xFFFDE74C)
+val td5 = Color(0xFFBA7BA1)
+
 
 
 val seed = Color(0xFFBE515D)

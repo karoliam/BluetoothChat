@@ -56,9 +56,9 @@ object DeviceScanCompose {
                                 val device: BluetoothDevice? = scanResults.get(key = key)
                                 onClick(device)
                             }
-                            .background(color = MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(10.dp))
+                            .background(color = MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(10.dp))
                             .fillMaxWidth()
-                            .padding(5.dp)
+                            .padding(7.dp)
                     ) {
                         Text(
                             text = scanResults[key]?.name ?: "Unknown Device",

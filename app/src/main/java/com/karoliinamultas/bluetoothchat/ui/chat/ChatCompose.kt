@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -38,6 +41,23 @@ object ChatCompose {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ShowChat(message: Message) {
+
+        val tekstit = listOf(
+            Color(0xFF00FDDC),
+            Color(0xFFFF729F),
+            Color(0xFF04E762),
+            Color(0xFFFDE74C),
+            Color(0xFFFF4365))
+        val randomTeksti = tekstit.random()
+
+        val backgroundit = listOf(
+            Color(0xFF111D4A),
+            Color(0xFF43AA8B),
+            Color(0xFF8B635C),
+            Color(0xFF60594D),
+            Color(0xFF93A29B))
+        val randomBack = backgroundit.random()
+
         Row(
             modifier = Modifier
                 .padding(5.dp)
@@ -47,15 +67,12 @@ object ChatCompose {
             Card(
                 modifier = Modifier
                     .width(150.dp)
-                    .padding(5.dp)
-                    .background(
-                        if (message is Message.RemoteMessage) Color(0xFFD3D3D3) else Color(
-                            0xFFFFDD0
-                        ),
-                    ),
+                    .padding(5.dp),
+
+                colors = CardDefaults.cardColors(containerColor = randomBack),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
-                Text(text = message.text, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(10.dp))
+                Text(text = message.text, color = randomTeksti, modifier = Modifier.padding(10.dp))
             }
         }
     }
@@ -137,7 +154,7 @@ object ChatCompose {
                     singleLine = true,
                 )
 
-                Button(
+                IconButton(
                     onClick = {
                         if (inputvalue.value.text.isNotEmpty()) {
                             ChatServer.sendMessage(inputvalue.value.text)
@@ -148,11 +165,13 @@ object ChatCompose {
                         .height(60.dp)
                         .width(80.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                ) {
-                    Text(text = "Send", fontSize = 13.sp)
-                }
+                    content = {
+                        Icon(
+                            imageVector = Icons.Filled.Send,
+                            contentDescription = "Localized description"
+                        )
+                    }
+                )
             }
         }
     }

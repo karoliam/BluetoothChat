@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.states.DeviceConnectionState
 import com.karoliinamultas.bluetoothchat.ui.chat.ChatCompose
@@ -56,7 +57,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             BluetoothChatTheme() {
                 val result = remember { mutableStateOf<Int?>(100) }
@@ -104,6 +104,10 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
+                        //Statusbar
+                        val systemUiController = rememberSystemUiController()
+                        systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
+
                         val deviceScanningState by viewModel.viewState.observeAsState()
 
                         val deviceConnectionState by ChatServer.deviceConnection.observeAsState()
@@ -113,10 +117,10 @@ class MainActivity : ComponentActivity() {
                             topBar = {
                                 CenterAlignedTopAppBar(
                                     colors = TopAppBarDefaults.smallTopAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        titleContentColor = Color.Black,
-                                        navigationIconContentColor = Color.Black,
-                                        actionIconContentColor = Color.Black
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
                                     ),
                                     title = {
                                         Text(
