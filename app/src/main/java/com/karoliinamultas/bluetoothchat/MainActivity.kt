@@ -4,8 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -44,6 +47,8 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 
 private const val TAG = "MainActivityTAG"
+private val REQUEST_CAMERA_PERMISSION = 1
+private val REQUEST_IMAGE_CAPTURE = 1
 
 class MainActivity : ComponentActivity() {
 
@@ -182,5 +187,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted, launch the camera
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+            } else {
+                // Permission is denied, show a message or disable camera-related functionality
+                Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     }
