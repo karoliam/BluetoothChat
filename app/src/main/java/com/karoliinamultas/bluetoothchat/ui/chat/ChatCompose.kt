@@ -2,14 +2,12 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,19 +15,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.karoliinamultas.bluetoothchat.CameraButton
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.models.Message
 
@@ -120,6 +115,7 @@ object ChatCompose {
     @Composable
     fun InputField(inputvalue: MutableState<TextFieldValue>) {
         val focusManager = LocalFocusManager.current
+        val context = LocalContext.current
         Box(
             Modifier
                 .fillMaxSize()
@@ -172,6 +168,11 @@ object ChatCompose {
                         )
                     }
                 )
+
+                // camera button here
+
+                CameraButton(context)
+
             }
         }
     }
