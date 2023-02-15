@@ -36,7 +36,21 @@ import kotlin.math.round
 private const val TAG = "DeviceScanCompose"
 
 object DeviceScanCompose {
+    val tekstit = listOf(
+        Color(0xFF00FDDC),
+        Color(0xFFFF729F),
+        Color(0xFF04E762),
+        Color(0xFFFDE74C),
+        Color(0xFFFF4365))
+    val randomTeksti = tekstit.random()
 
+    val backgroundit = listOf(
+        Color(0xFF111D4A),
+        Color(0xFF43AA8B),
+        Color(0xFF8B635C),
+        Color(0xFF60594D),
+        Color(0xFF93A29B))
+    val randomBack = backgroundit.random()
     @SuppressLint("MissingPermission")
     @Composable
     fun ShowDevices(
@@ -56,17 +70,19 @@ object DeviceScanCompose {
                                 val device: BluetoothDevice? = scanResults.get(key = key)
                                 onClick(device)
                             }
-                            .background(color = MaterialTheme.colorScheme.onBackground, shape = RoundedCornerShape(10.dp))
+                            .background(color = randomBack, shape = RoundedCornerShape(10.dp))
                             .fillMaxWidth()
                             .padding(7.dp)
                     ) {
                         Text(
                             text = scanResults[key]?.name ?: "Unknown Device",
+                            color = randomTeksti
                         )
                         Spacer(modifier = Modifier.size(10.dp))
                         Text(
                             text = scanResults[key]?.address ?: "",
-                            fontWeight = FontWeight.Light
+                            fontWeight = FontWeight.Light,
+                            color = randomTeksti
                         )
                     }
                     Spacer(modifier = Modifier.size(10.dp))
