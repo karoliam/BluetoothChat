@@ -6,13 +6,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.karoliinamultas.bluetoothchat.ui.StartScreen
 import com.karoliinamultas.bluetoothchat.ui.chat.ChatWindow
 import com.karoliinamultas.bluetoothchat.ui.chat.ShowChats
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
@@ -44,6 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            //Navi
             val navController = rememberNavController()
             BluetoothChatTheme() {
                 val result = remember { mutableStateOf<Int?>(100) }
@@ -80,60 +80,18 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        //Statusbar
-                        val systemUiController = rememberSystemUiController()
-                        systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
 
-                        Scaffold(
-                            topBar = {
-                                CenterAlignedTopAppBar(
-                                    colors = TopAppBarDefaults.smallTopAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.background,
-                                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                                    ),
-                                    title = {
-                                        Text(
-                                            "Restroom Chat",
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                            navigationIcon = {
-                                        IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.ArrowBack,
-                                                contentDescription = "Back button"
-                                            )
-                                        }
-                                    },
-                                    actions = {
-                                        IconButton(onClick = { /* doSomething() */ }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Menu,
-                                                contentDescription = "Menu button"
-                                            )
-                                        }
-                                    },
-                                )
-                            },
-                            content = { innerPadding ->
-                                Column(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(innerPadding)) {
-                                    NavHost(navController = navController, startDestination = Screen.ShowChats.route) {
-                                        composable(route = Screen.ShowChats.route) {
-                                            ShowChats(navController = navController)
-                                        }
-                                        composable(route = Screen.ChatWindow.route){
-                                            ChatWindow()
-                                        }
-                                    }
-                                }
+                        NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
+                            composable(route = Screen.StartScreen.route){
+                                StartScreen(navController = navController)
                             }
-                        )
+                            composable(route = Screen.ShowChats.route) {
+                                ShowChats(navController = navController)
+                            }
+                            composable(route = Screen.ChatWindow.route){
+                                ChatWindow(navController = navController)
+                            }
+                        }
                     }
                 }
             }
