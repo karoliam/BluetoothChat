@@ -36,18 +36,17 @@ import com.karoliinamultas.bluetoothchat.Screen
             contentAlignment = Alignment.Center
             ) {
             Image(
-                painter = painterResource(id = R.drawable.startscreen),
+                painter = painterResource(id = R.drawable.test),
                 contentDescription = null,
                 Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
             )
             Column(Modifier) {
-                Text("Restroom Chat", Modifier.padding(0.dp, 40.dp, 0.dp, 250.dp), fontSize = 42.sp, color = Color.White)
-                Text("Go chat by pressing start", Modifier.align(CenterHorizontally).padding(0.dp, 80.dp, 0.dp, 30.dp ), fontSize = 14.sp, color = Color.White)
+                Text("Go chat by pressing start", Modifier.align(CenterHorizontally).padding(0.dp, 500.dp, 0.dp, 30.dp ), fontSize = 14.sp, color = Color.Black)
                 Button(
                     onClick = { navController.navigate(Screen.ShowChats.route)},
                     Modifier.align(CenterHorizontally).padding(30.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
                 ) {
                     Text("Start")
                 }

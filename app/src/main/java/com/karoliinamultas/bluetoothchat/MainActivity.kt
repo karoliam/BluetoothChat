@@ -80,7 +80,6 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-
                         NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
                             composable(route = Screen.StartScreen.route){
                                 StartScreen(navController = navController)
