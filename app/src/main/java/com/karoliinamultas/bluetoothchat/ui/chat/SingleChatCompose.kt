@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,17 +24,21 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.karoliinamultas.bluetoothchat.CameraButton
-import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
-import com.karoliinamultas.bluetoothchat.models.Message
 
 
 private const val TAG = "ChatCompose"
 
-object ChatCompose {
+
+@Composable
+fun ChatWindow(){
+    Chats()
+    ChatsList()
+}
+
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ShowChat(message: Message) {
+    fun ShowChat(modifier: Modifier = Modifier) {
 
         val tekstit = listOf(
             Color(0xFF00FDDC),
@@ -57,7 +60,7 @@ object ChatCompose {
             modifier = Modifier
                 .padding(5.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = if (message is Message.RemoteMessage) Arrangement.Start else Arrangement.End
+            horizontalArrangement = Arrangement.Center
         ) {
             Card(
                 modifier = Modifier
@@ -67,38 +70,17 @@ object ChatCompose {
                 colors = CardDefaults.cardColors(containerColor = randomBack),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
-                Text(text = message.text, color = randomTeksti, modifier = Modifier.padding(10.dp))
+                Text(text = "Chat box", color = randomTeksti, modifier = Modifier.padding(10.dp))
             }
         }
     }
 
     @Composable
-    fun Chats(deviceName: String?) {
-        val message by ChatServer.messages.observeAsState()
+    fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier) {
 
         val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
-        val messageList = remember {
-            mutableStateListOf<Message>()
-        }
 
-        if (message != null && !messageList.contains(message)) {
-            messageList.add(message!!)
-        }
-
-
-
-        if (messageList.isNotEmpty()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Surface(modifier = Modifier
-                    .fillMaxHeight(fraction = 0.89f)) {
-                    ChatsList(messageList)
-                }
-
-
-                InputField(inputvalue)
-            }
-        } else {
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -107,27 +89,26 @@ object ChatCompose {
                     Text(text = "No Chat History")
                 }
 
-                InputField(inputvalue = inputvalue)
+                InputField()
             }
         }
-    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun InputField(inputvalue: MutableState<TextFieldValue>) {
+    fun InputField(/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier) {
         val focusManager = LocalFocusManager.current
         val context = LocalContext.current
         Box(
             Modifier
-                .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))) {
             Row(
                 Modifier
                     .padding(5.dp)
             ) {
                 TextField(
-                    value = inputvalue.value,
+                    value = "inputvalue.value",
                     onValueChange = {
-                        inputvalue.value = it
+                        "inputvalue.value = it"
                     },
                     Modifier
                         .width(265.dp)
@@ -151,15 +132,10 @@ object ChatCompose {
                 )
 
                 IconButton(
-                    onClick = {
-                        if (inputvalue.value.text.isNotEmpty()) {
-                            ChatServer.sendMessage(inputvalue.value.text)
-                            inputvalue.value = TextFieldValue()
-                        }
-                    },
+                    onClick = { /*Sending message comes here*/ },
                     modifier = Modifier
                         .height(60.dp)
-                        .width(80.dp)
+                        .width(60.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
                     content = {
                         Icon(
@@ -176,14 +152,12 @@ object ChatCompose {
             }
         }
     }
+
     @Composable
-    fun ChatsList(messagesList: List<Message>) {
-        LazyColumn(modifier = Modifier.background(Color.White)) {
-            items(count = messagesList.size) { index ->
-                if (messagesList.isNotEmpty())
-                    ShowChat(message = messagesList[index])
+    fun ChatsList(/*messagesList: List<Message>*/ modifier: Modifier = Modifier) {
+        LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+            items(/*count = messagesList.size*/1) { index ->
+                    ShowChat()
             }
         }
     }
-
-}

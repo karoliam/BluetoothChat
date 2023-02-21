@@ -33,7 +33,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
-import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -129,7 +128,7 @@ fun CameraButton(
         },
         modifier = Modifier
             .height(60.dp)
-            .width(80.dp)
+            .width(60.dp)
             .padding(0.dp, 6.dp, 0.dp, 0.dp),
         content = {
             Icon(
