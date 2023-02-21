@@ -10,15 +10,13 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -130,6 +128,7 @@ fun CameraButton(
             .height(60.dp)
             .width(60.dp)
             .padding(0.dp, 6.dp, 0.dp, 0.dp),
+        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
         content = {
             Icon(
                 imageVector = Icons.Filled.Search,

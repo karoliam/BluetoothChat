@@ -2,6 +2,7 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +48,7 @@ fun ChatWindow(navController: NavController){
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                     navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
@@ -88,7 +89,6 @@ fun ChatWindow(navController: NavController){
             }
         }
     )
-
 }
 
 
@@ -156,7 +156,7 @@ fun ChatWindow(navController: NavController){
         val context = LocalContext.current
         Box(
             Modifier
-                .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f))) {
+                .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
             Row(
                 Modifier
                     .padding(5.dp)
@@ -179,12 +179,13 @@ fun ChatWindow(navController: NavController){
                         imeAction = androidx.compose.ui.text.input.ImeAction.Done,
                     ),
                     textStyle = TextStyle(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = TextUnit.Unspecified,
                         fontFamily = FontFamily.SansSerif
                     ),
                     maxLines = 1,
                     singleLine = true,
+                    colors = TextFieldDefaults.textFieldColors(containerColor = MaterialTheme.colorScheme.background)
                 )
 
                 IconButton(
@@ -193,6 +194,7 @@ fun ChatWindow(navController: NavController){
                         .height(60.dp)
                         .width(60.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
                     content = {
                         Icon(
                             imageVector = Icons.Filled.Send,
