@@ -2,17 +2,21 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,19 +31,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.karoliinamultas.bluetoothchat.CameraButton
 import com.karoliinamultas.bluetoothchat.Screen
-import com.karoliinamultas.bluetoothchat.ui.StartScreen
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "ChatCompose"
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ChatWindow(navController: NavController){
     //Statusbar
@@ -85,7 +87,6 @@ fun ChatWindow(navController: NavController){
                     .fillMaxSize()
                     .padding(innerPadding)) {
                 Chats()
-                ChatsList()
             }
         }
     )
@@ -140,7 +141,7 @@ fun ChatWindow(navController: NavController){
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize(fraction = 0.89f)
+                    modifier = Modifier.fillMaxSize(fraction = 0.80f)
                 ) {
                     Text(text = "No Chat History")
                 }
@@ -149,11 +150,36 @@ fun ChatWindow(navController: NavController){
             }
         }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     fun InputField(/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier) {
         val focusManager = LocalFocusManager.current
         val context = LocalContext.current
+        //BotMenu
+        // Declaring a Boolean value to
+        // store bottom sheet collapsed state
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState =
+        BottomSheetState(BottomSheetValue.Collapsed))
+
+        // Declaring Coroutine scope
+        val coroutineScope = rememberCoroutineScope()
+
+        BottomSheetScaffold(
+            scaffoldState = bottomSheetScaffoldState,
+            sheetContent =  {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(600.dp)
+                        .background(MaterialTheme.colorScheme.onBackground)) {
+                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "Hello Geek!", fontSize = 20.sp, color = Color.White)
+                    }
+                }
+            },
+            sheetPeekHeight = 0.dp
+        ){
+           ChatsList()
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
@@ -203,11 +229,30 @@ fun ChatWindow(navController: NavController){
                     }
                 )
 
-                // camera button here
+                IconButton(
+                    onClick = { coroutineScope.launch {
+                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }else{
+                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                        }
+                    } },
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(60.dp)
+                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                    content = {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowUp,
+                            contentDescription = "Localized description"
+                        )
+                    }
+                )
 
-                CameraButton(context)
+                //CameraButton(context)
 
-            }
+            }}
         }
     }
 
