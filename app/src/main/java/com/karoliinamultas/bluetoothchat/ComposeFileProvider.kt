@@ -14,18 +14,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.twotone.Call
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -95,14 +97,6 @@ fun CameraButton(
         mutableStateOf<Uri?>(null)
     }
 
-//    val imagePicker = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent(),
-//        onResult = { uri ->
-//            hasImage = uri != null
-//            imageUri = uri
-//        }
-//    )
-
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
@@ -132,7 +126,44 @@ fun CameraButton(
         colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
         content = {
             Icon(
-                imageVector = Icons.Filled.KeyboardArrowUp,
+                imageVector = ImageVector.vectorResource(id = R.drawable.photo_camera),
+                contentDescription = "Camera button"
+            )
+        }
+    )
+}
+
+@Composable
+fun GalleryButton(
+    context: Context
+) {
+    var hasImage by remember {
+        mutableStateOf(false)
+    }
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            hasImage = uri != null
+            imageUri = uri
+        }
+    )
+
+    IconButton(
+        onClick = {
+            imagePicker.launch("picture/*")
+        },
+        modifier = Modifier
+            .height(60.dp)
+            .width(60.dp)
+            .padding(0.dp, 6.dp, 0.dp, 0.dp),
+        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+        content = {
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.gallery_thumbnail),
                 contentDescription = "Camera button"
             )
         }

@@ -21,8 +21,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -34,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.karoliinamultas.bluetoothchat.CameraButton
+import com.karoliinamultas.bluetoothchat.GalleryButton
+import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
 import kotlinx.coroutines.launch
 
@@ -145,7 +150,6 @@ fun ChatWindow(navController: NavController){
                 ) {
                     Text(text = "No Chat History")
                 }
-
                 InputField()
             }
         }
@@ -171,15 +175,60 @@ fun ChatWindow(navController: NavController){
                     Modifier
                         .fillMaxWidth()
                         .height(600.dp)
-                        .background(MaterialTheme.colorScheme.onBackground)) {
-                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Hello Geek!", fontSize = 20.sp, color = Color.White)
+                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
+                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
+
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isExpanded) {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .width(60.dp)
+                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = "Localized description"
+                                    )
+                                }
+                            )}
+                    Column(
+                        Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                            Row() {
+                            IconButton(
+                                onClick = { },
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .width(60.dp)
+                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                                content = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.draw),
+                                        contentDescription = "Localized description"
+                                    )
+                                }
+                            )
+                            CameraButton(context)
+                                GalleryButton(context)
+                        }
                     }
                 }
             },
             sheetPeekHeight = 0.dp
         ){
-           ChatsList()
+            ChatsList(modifier = Modifier)
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
