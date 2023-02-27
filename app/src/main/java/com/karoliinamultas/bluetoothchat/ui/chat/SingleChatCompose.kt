@@ -36,11 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.karoliinamultas.bluetoothchat.CameraButton
-import com.karoliinamultas.bluetoothchat.GalleryButton
+import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
-import com.karoliinamultas.bluetoothchat.Screen
 import kotlinx.coroutines.launch
+import java.net.URL
 
 
 private const val TAG = "ChatCompose"
@@ -91,7 +90,7 @@ fun ChatWindow(navController: NavController){
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats()
+                InputField()
             }
         }
     )
@@ -133,6 +132,7 @@ fun ChatWindow(navController: NavController){
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Text(text = "Chat box", color = randomTeksti, modifier = Modifier.padding(10.dp))
+
             }
         }
     }
@@ -143,14 +143,16 @@ fun ChatWindow(navController: NavController){
         val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
 
-            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.height(600.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize(fraction = 0.80f)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     Text(text = "No Chat History")
                 }
-                InputField()
+                    ChatsList()
             }
         }
 
@@ -174,7 +176,7 @@ fun ChatWindow(navController: NavController){
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(600.dp)
+                        .height(400.dp)
                         .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
 
@@ -228,7 +230,7 @@ fun ChatWindow(navController: NavController){
             },
             sheetPeekHeight = 0.dp
         ){
-            ChatsList(modifier = Modifier)
+            Chats()
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {

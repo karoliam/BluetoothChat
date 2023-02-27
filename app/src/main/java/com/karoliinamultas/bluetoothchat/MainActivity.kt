@@ -31,6 +31,7 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import java.net.URL
 
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
