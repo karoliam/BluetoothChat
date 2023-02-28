@@ -5,6 +5,9 @@ import android.bluetooth.BluetoothAdapter
 import android.media.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import android.media.Image
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -44,6 +47,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
@@ -99,7 +103,7 @@ fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats(mBluetoothAdapter, model)
+                Chats(Modifier, navController,mBluetoothAdapter, model)
             }
         }
     )
@@ -147,7 +151,8 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun Chats(mBluetoothAdapter: BluetoothAdapter, model: MyViewModel,/*deviceName: String?*/ modifier: Modifier = Modifier) {
+fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel,/*deviceName: String?*/ modifier: Modifier = Modifier) {
+@Composable
 
     val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
@@ -159,13 +164,13 @@ fun Chats(mBluetoothAdapter: BluetoothAdapter, model: MyViewModel,/*deviceName: 
             .fillMaxHeight(fraction = 0.89f)) {
             ChatsList(model)
         }
-        InputField(mBluetoothAdapter, model)
+        InputField( modifier, navController, mBluetoothAdapter, model)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun InputField(mBluetoothAdapter: BluetoothAdapter, model: MyViewModel,/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier) {
+fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     var text by remember { mutableStateOf(TextFieldValue("")) }
@@ -179,66 +184,66 @@ fun InputField(mBluetoothAdapter: BluetoothAdapter, model: MyViewModel,/*inputva
     // Declaring Coroutine scope
     val coroutineScope = rememberCoroutineScope()
 
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent =  {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
-                Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
+        BottomSheetScaffold(
+            scaffoldState = bottomSheetScaffoldState,
+            sheetContent =  {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
+                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
 
-                    IconButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                if (bottomSheetScaffoldState.bottomSheetState.isExpanded) {
-                                    bottomSheetScaffoldState.bottomSheetState.collapse()
-                                } else {
-                                    bottomSheetScaffoldState.bottomSheetState.expand()
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isExpanded) {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .width(60.dp)
+                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = "Localized description"
+                                    )
                                 }
-                            }
-                        },
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(60.dp)
-                            .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                        content = {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowDown,
-                                contentDescription = "Localized description"
+                            )}
+                    Column(
+                        Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row() {
+                            IconButton(
+                                onClick = { navController.navigate(Screen.DrawingPad.route) },
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .width(60.dp)
+                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                                content = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.draw),
+                                        contentDescription = "Localized description"
+                                    )
+                                }
                             )
+                            CameraButton(context)
+                            GalleryButton(context)
                         }
-                    )}
-                Column(
-                    Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row() {
-                        IconButton(
-                            onClick = {},
-                            modifier = Modifier
-                                .height(60.dp)
-                                .width(60.dp)
-                                .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                            content = {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.draw),
-                                    contentDescription = "Localized description"
-                                )
-                            }
-                        )
-                        CameraButton(context)
-                        GalleryButton(context)
                     }
                 }
-            }
-        },
-        sheetPeekHeight = 0.dp
-    ){
+            },
+            sheetPeekHeight = 0.dp
+        ){
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
