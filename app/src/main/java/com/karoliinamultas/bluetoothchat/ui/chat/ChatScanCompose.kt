@@ -1,19 +1,13 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.bluetooth.BluetoothAdapter
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.Screen
 
 
@@ -29,7 +24,7 @@ private const val TAG = "DeviceScanCompose"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowChats(navController: NavController){
+fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel){
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
@@ -72,7 +67,7 @@ fun ShowChats(navController: NavController){
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                ShowDevices(navController)
+                ShowDevices(navController, mBluetoothAdapter, model)
                 DeviceScan()
             }
         }
@@ -98,11 +93,16 @@ fun ShowChats(navController: NavController){
     @SuppressLint("MissingPermission")
     @Composable
     fun ShowDevices(
-        navController: NavController
+        navController: NavController,
         /*scanResults: Map<String, BluetoothDevice>,
         onClick: (BluetoothDevice?) -> Unit*/
+        mBluetoothAdapter: BluetoothAdapter,
+        model : MyViewModel
     ) {
-        Button(onClick = { navController.navigate(Screen.ChatWindow.route) }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
+        Button(onClick = {
+            model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
+            navController.navigate(Screen.ChatWindow.route)
+                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
         LazyColumn(
             modifier = Modifier
                 .padding(10.dp)

@@ -2,6 +2,8 @@ package com.karoliinamultas.bluetoothchat
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -17,11 +19,9 @@ import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
 import com.karoliinamultas.bluetoothchat.ui.chat.ChatWindow
 import com.karoliinamultas.bluetoothchat.ui.chat.ShowChats
@@ -31,16 +31,20 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import java.net.URL
 
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_IMAGE_CAPTURE = 1
 
 class MainActivity : ComponentActivity() {
+    var mBluetoothAdapter: BluetoothAdapter? = null
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = bluetoothManager.adapter
+        val model = MyViewModel()
         setContent {
             //Navi
             val navController = rememberNavController()
@@ -84,10 +88,10 @@ class MainActivity : ComponentActivity() {
                                 StartScreen(navController = navController)
                             }
                             composable(route = Screen.ShowChats.route) {
-                                ShowChats(navController = navController)
+                                ShowChats(navController = navController, mBluetoothAdapter!!, model)
                             }
                             composable(route = Screen.ChatWindow.route){
-                                ChatWindow(navController = navController)
+                                ChatWindow(navController = navController, mBluetoothAdapter!!, model)
                             }
                         }
                     }

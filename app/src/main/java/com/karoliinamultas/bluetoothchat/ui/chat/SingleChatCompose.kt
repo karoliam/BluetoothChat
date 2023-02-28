@@ -1,12 +1,16 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
 
+import android.bluetooth.BluetoothAdapter
+import android.util.Log
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -18,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,10 +36,13 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
@@ -47,8 +55,8 @@ private const val TAG = "ChatCompose"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun ChatWindow(navController: NavController){
-    //Statusbar
+fun ChatWindow(navController: NavController , mBluetoothAdapter: BluetoothAdapter, model:MyViewModel){
+
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
     Scaffold(
@@ -90,16 +98,19 @@ fun ChatWindow(navController: NavController){
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                InputField()
+                Chats(mBluetoothAdapter, model)
             }
         }
     )
 }
+@Composable
+fun MessageList(model: MyViewModel = viewModel()){
 
+}
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ShowChat(modifier: Modifier = Modifier) {
+    fun ShowChat(text : String, modifier: Modifier = Modifier) {
 
         val tekstit = listOf(
             Color(0xFF00FDDC),
@@ -126,39 +137,44 @@ fun ChatWindow(navController: NavController){
             Card(
                 modifier = Modifier
                     .width(150.dp)
-                    .padding(5.dp),
+                    .padding(5.dp)
+                    .align(Alignment.CenterVertically),
+
 
                 colors = CardDefaults.cardColors(containerColor = randomBack),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
-                Text(text = "Chat box", color = randomTeksti, modifier = Modifier.padding(10.dp))
+                Text(text = text, color = randomTeksti, modifier = Modifier.padding(10.dp))
 
             }
         }
     }
 
     @Composable
-    fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier) {
+    fun Chats(mBluetoothAdapter: BluetoothAdapter, model:MyViewModel,/*deviceName: String?*/ modifier: Modifier = Modifier) {
 
         val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
 
-            Column(modifier = Modifier.height(600.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxSize(fraction = 0.8f)
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    Text(text = "No Chat History")
+                    ChatsList(model)
                 }
-                    ChatsList()
+
+                InputField(mBluetoothAdapter = mBluetoothAdapter, model)
             }
         }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
-    fun InputField(/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier) {
+    fun InputField(mBluetoothAdapter: BluetoothAdapter, model: MyViewModel, modifier: Modifier = Modifier) {
+        var text by remember { mutableStateOf(TextFieldValue("")) }
+
         val focusManager = LocalFocusManager.current
         val context = LocalContext.current
         //BotMenu
@@ -230,7 +246,7 @@ fun ChatWindow(navController: NavController){
             },
             sheetPeekHeight = 0.dp
         ){
-            Chats()
+            ChatsList(model)
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
@@ -239,9 +255,9 @@ fun ChatWindow(navController: NavController){
                     .padding(5.dp)
             ) {
                 TextField(
-                    value = "inputvalue.value",
+                    value = text,
                     onValueChange = {
-                        "inputvalue.value = it"
+                        text = it
                     },
                     Modifier
                         .width(265.dp)
@@ -265,8 +281,10 @@ fun ChatWindow(navController: NavController){
                     colors = TextFieldDefaults.textFieldColors(containerColor = MaterialTheme.colorScheme.background)
                 )
 
+
                 IconButton(
-                    onClick = { /*Sending message comes here*/ },
+                    onClick = {model.sendMessage(mBluetoothAdapter.bluetoothLeAdvertiser, mBluetoothAdapter.bluetoothLeScanner, text.text)
+                         },
                     modifier = Modifier
                         .height(60.dp)
                         .width(60.dp)
@@ -308,10 +326,29 @@ fun ChatWindow(navController: NavController){
     }
 
     @Composable
-    fun ChatsList(/*messagesList: List<Message>*/ modifier: Modifier = Modifier) {
-        LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-            items(/*count = messagesList.size*/1) { index ->
-                    ShowChat()
+    fun ChatsList(model:MyViewModel, modifier: Modifier = Modifier) {
+        val valueList: List<String>? by model.messages.observeAsState()
+
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(ScrollState(1), true)) {
+            if(!valueList.isNullOrEmpty()){
+                valueList!!.forEach{item ->
+                    androidx.compose.material.Text(text = item, )
+                }
             }
         }
+
+        LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+
+//            items(valueList?.size!!) { index ->
+//                Log.d("state", valueList?.get(index).toString())
+//                    ShowChat( valueList?.get(index)!!)
+//                Text("Text")
+//            }
+        }
     }
+
+
+
+
