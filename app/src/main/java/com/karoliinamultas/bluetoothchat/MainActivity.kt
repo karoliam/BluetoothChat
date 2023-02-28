@@ -13,15 +13,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.karoliinamultas.bluetoothchat.ui.DrawingPad
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
 import com.karoliinamultas.bluetoothchat.ui.chat.ChatWindow
 import com.karoliinamultas.bluetoothchat.ui.chat.ShowChats
@@ -31,14 +30,12 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import java.net.URL
 
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_IMAGE_CAPTURE = 1
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -79,6 +76,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
+                        val context = LocalContext.current
                         NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
                             composable(route = Screen.StartScreen.route){
                                 StartScreen(navController = navController)
@@ -88,6 +86,9 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = Screen.ChatWindow.route){
                                 ChatWindow(navController = navController)
+                            }
+                            composable(route = Screen.DrawingPad.route){
+                                DrawingPad(context, navController = navController)
                             }
                         }
                     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -20,15 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
+import com.karoliinamultas.bluetoothchat.R
+import com.karoliinamultas.bluetoothchat.Screen
 import dev.shreyaspatil.capturable.Capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import java.io.ByteArrayOutputStream
@@ -43,7 +46,7 @@ data class PathState(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScratchPad(context: Context) {
+fun DrawingPad(context: Context, navController: NavController) {
     val drawColor = remember { mutableStateOf(Color.Black) }
     val drawBrush = remember { mutableStateOf(5f) }
     val path = remember { mutableStateOf(mutableListOf<PathState>()) }
@@ -51,48 +54,76 @@ fun ScratchPad(context: Context) {
 
     Scaffold(
         topBar = {
-            DrawingTools(drawColor, drawBrush, path)
-        }) {
+            DrawingTools(drawColor, drawBrush, path, navController)
+        }
+    ) {
         Column{
             PaintBody(path, context, drawColor, drawBrush)
-
         }
     }
 }
 
 
 @Composable
-fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>, path: MutableState<MutableList<PathState>>) {
+fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>, path: MutableState<MutableList<PathState>>, navController: NavController) {
     val blackColor = Color.Black
     val blueColor = Color.Blue
     val greenColor = Color.Green
     val pinkColor = Color(255, 163, 165)
     val yellowColor = Color.Yellow
     val redColor = Color.Red
+    val magentaColor = Color.Magenta
+    val purpleColor = Color(103, 58, 183, 255)
+    val brownColor = Color(100, 68, 51, 255)
     val eraser = Color.White
 
-    val colorList = listOf(blackColor, blueColor, redColor, greenColor, pinkColor, yellowColor)
+    val colorList = listOf(
+        blackColor,
+        blueColor,
+        redColor,
+        magentaColor,
+        greenColor,
+        pinkColor,
+        yellowColor,
+        purpleColor,
+        brownColor
+    )
     val strokes = remember { (1..25 step 5).toList() }
+    var isClicked = remember { mutableStateOf(false)}
+    val strokeMap: MutableMap<Int, Boolean> = remember {mutableStateMapOf()}
 
+    fun changeCircleToRectangle() {
+        strokes.forEach {
+            strokeMap[it] = false
+        }
+    }
     Column(modifier = Modifier.fillMaxSize()) {
-
-        LazyRow(modifier = Modifier.fillMaxWidth()) {
-            items(colorList) { color ->
-                IconButton(
-                    onClick = {
-                        drawColor.value = color
-                    },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .border(
-                            border = BorderStroke(
-                                width = 100.dp,
-                                color = color
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                ) {}
-
+        Row() {
+            IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }, modifier = Modifier.padding(8.dp)) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back button",
+                    modifier = Modifier.size(42.dp)
+                )
+            }
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                items(colorList) { color ->
+                    IconButton(
+                        onClick = {
+                            drawColor.value = color
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .border(
+                                border = BorderStroke(
+                                    width = 100.dp,
+                                    color = color
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .size(42.dp)
+                    ) {}
+                }
             }
         }
 
@@ -100,7 +131,9 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
             items(strokes) { stroke ->
                 IconButton(
                     onClick = {
+                        changeCircleToRectangle()
                         drawBrush.value = stroke.toFloat()
+                        strokeMap[stroke] = true
                     },
                     modifier = Modifier
                         .padding(8.dp)
@@ -109,8 +142,13 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
                                 width = with(LocalDensity.current) { stroke.toDp() },
                                 color = drawColor.value
                             ),
-                            shape = CircleShape
+                            shape = if (strokeMap[stroke] == true) {
+                                CircleShape
+                            } else {
+                                RoundedCornerShape(16.dp)
+                            }
                         )
+                        .size(42.dp)
                 ) {}
 
             }
@@ -118,27 +156,29 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
         Row(modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = {
                 drawColor.value = eraser
-                Log.d("DBG","$path")
-            }){
+                Log.d("DBG", "$path")
+            }) {
                 Icon(
-                    imageVector = Icons.Filled.Clear,
-                    contentDescription = "Eraser"
+                    imageVector = ImageVector.vectorResource(R.drawable.highlighter_size_4_40px),
+                    contentDescription = "Eraser",
+                    modifier = Modifier.padding(8.dp)
                 )
             }
 
             IconButton(onClick = {
                 path.value = mutableListOf()
-            }){
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete"
+                    contentDescription = "Delete",
+                    modifier = Modifier.size(42.dp)
+                        .padding(8.dp)
                 )
             }
-
-
         }
     }
 }
+
 
 
 

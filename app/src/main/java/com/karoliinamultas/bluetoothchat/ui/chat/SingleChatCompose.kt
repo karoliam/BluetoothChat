@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
@@ -97,7 +98,7 @@ fun ChatWindow(navController: NavController){
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats()
+                Chats(Modifier, navController)
             }
         }
     )
@@ -145,7 +146,7 @@ fun ChatWindow(navController: NavController){
 
 
 @Composable
-    fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier) {
+    fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier, navController: NavController) {
 
         val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
@@ -157,13 +158,13 @@ fun ChatWindow(navController: NavController){
             .fillMaxHeight(fraction = 0.89f)) {
             ChatsList()
         }
-        InputField()
+        InputField(modifier, navController)
     }
         }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
-    fun InputField(/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier) {
+    fun InputField(/*inputvalue: MutableState<TextFieldValue>*/ modifier: Modifier = Modifier, navController: NavController) {
         val focusManager = LocalFocusManager.current
         val context = LocalContext.current
         //BotMenu
@@ -214,7 +215,7 @@ fun ChatWindow(navController: NavController){
                     ) {
                         Row() {
                             IconButton(
-                                onClick = { },
+                                onClick = { navController.navigate(Screen.DrawingPad.route) },
                                 modifier = Modifier
                                     .height(60.dp)
                                     .width(60.dp)

@@ -59,7 +59,6 @@ dependencies {
     //Status bar
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 
-
     // LiveData
     implementation 'androidx.compose.runtime:runtime-livedata:1.1.1'
 
