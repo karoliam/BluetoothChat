@@ -1,54 +1,25 @@
 package com.karoliinamultas.bluetoothchat
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Bitmap
-import androidx.compose.foundation.Canvas
-import androidx.compose.runtime.Composable
-
 import android.os.Bundle
-import android.util.Log
-import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.LightGray
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.karoliinamultas.bluetoothchat.bluetooth.ChatServer
 import com.karoliinamultas.bluetoothchat.ui.ScratchPad
 import com.karoliinamultas.bluetoothchat.ui.chat.DeviceScanViewModel
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
-import dev.shreyaspatil.capturable.Capturable
-import dev.shreyaspatil.capturable.controller.rememberCaptureController
-import java.io.ByteArrayOutputStream
 
 private const val TAG = "MainActivityTAG"
-private val REQUEST_CAMERA_PERMISSION = 1
-private val REQUEST_IMAGE_CAPTURE = 1
+private const val REQUEST_CAMERA_PERMISSION = 1
+private const val REQUEST_IMAGE_CAPTURE = 1
 
 
 class MainActivity : ComponentActivity() {
@@ -70,12 +41,12 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     ScratchPad(context = this)
-
+//
 //                val result = remember { mutableStateOf<Int?>(100) }
 //                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //                    result.value = it.resultCode
-                }
-            }
+//                }
+//            }
 //
 //                LaunchedEffect(key1 = true){
 //
@@ -196,12 +167,8 @@ class MainActivity : ComponentActivity() {
             }
 
         }
-
-
-
-
-
-
+    }
+}
 
 
 //    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
