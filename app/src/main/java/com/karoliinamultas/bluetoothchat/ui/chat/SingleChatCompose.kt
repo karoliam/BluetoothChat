@@ -1,7 +1,11 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
 
+import android.media.Image
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +25,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
@@ -31,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,7 +97,7 @@ fun ChatWindow(navController: NavController){
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                InputField()
+                Chats()
             }
         }
     )
@@ -132,28 +139,26 @@ fun ChatWindow(navController: NavController){
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Text(text = "Chat box", color = randomTeksti, modifier = Modifier.padding(10.dp))
-
             }
         }
     }
 
-    @Composable
+
+@Composable
     fun Chats(/*deviceName: String?*/ modifier: Modifier = Modifier) {
 
         val inputvalue = remember { mutableStateOf(TextFieldValue()) }
 
 
-            Column(modifier = Modifier.height(600.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    Text(text = "No Chat History")
-                }
-                    ChatsList()
-            }
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Surface(modifier = Modifier
+            .padding(all = Dp(5f))
+            .fillMaxHeight(fraction = 0.89f)) {
+            ChatsList()
+        }
+        InputField()
+    }
         }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -176,7 +181,7 @@ fun ChatWindow(navController: NavController){
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(400.dp)
+                        .height(250.dp)
                         .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
 
@@ -207,7 +212,7 @@ fun ChatWindow(navController: NavController){
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                            Row() {
+                        Row() {
                             IconButton(
                                 onClick = { },
                                 modifier = Modifier
@@ -223,14 +228,13 @@ fun ChatWindow(navController: NavController){
                                 }
                             )
                             CameraButton(context)
-                                GalleryButton(context)
+                            GalleryButton(context)
                         }
                     }
                 }
             },
             sheetPeekHeight = 0.dp
         ){
-            Chats()
         Box(
             Modifier
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
@@ -239,9 +243,9 @@ fun ChatWindow(navController: NavController){
                     .padding(5.dp)
             ) {
                 TextField(
-                    value = "inputvalue.value",
+                    value = "",
                     onValueChange = {
-                        "inputvalue.value = it"
+                        ""
                     },
                     Modifier
                         .width(265.dp)
