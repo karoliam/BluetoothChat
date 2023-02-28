@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
-        val model = MyViewModel()
+        val model = MyViewModel(mBluetoothAdapter!!)
         setContent {
             //Navi
             val navController = rememberNavController()
