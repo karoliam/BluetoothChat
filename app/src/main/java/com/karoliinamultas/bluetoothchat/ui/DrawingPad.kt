@@ -313,7 +313,7 @@ Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bott
                 Button(onClick = {
                     canvasBitmap = null
                     val byteArray = bitmapToByteArray(bitmap.asAndroidBitmap())
-                    Log.d("DBG", "bytearray $byteArray")
+                    Log.d("DBG", "bytearray ${byteArray}")
                 }
                 ) {
                     Text("Close Preview")

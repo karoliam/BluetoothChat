@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
         val model = MyViewModel(mBluetoothAdapter!!)
+
         setContent {
             //Navia
             val navController = rememberNavController()
@@ -88,7 +89,7 @@ class MainActivity : ComponentActivity() {
                         val context = LocalContext.current
                         NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
                             composable(route = Screen.StartScreen.route){
-                                StartScreen(navController = navController)
+                                StartScreen(navController = navController, mBluetoothAdapter!!, model)
                             }
                             composable(route = Screen.ShowChats.route) {
                                 ShowChats(navController = navController, mBluetoothAdapter!!, model)

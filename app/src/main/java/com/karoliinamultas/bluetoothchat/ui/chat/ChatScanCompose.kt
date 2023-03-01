@@ -1,12 +1,17 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,60 +104,85 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
         mBluetoothAdapter: BluetoothAdapter,
         model : MyViewModel
     ) {
-        Button(onClick = {
-            model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
-            navController.navigate(Screen.ChatWindow.route)
-                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
+        val scanResults: Set<String>? by model.beacons.observeAsState()
+
+//        Button(onClick = {
+//            model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
+//            navController.navigate(Screen.ChatWindow.route)
+//                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
         LazyColumn(
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
         ) {
-            /*itemsIndexed(scanResults.keys.toList()) { _, key ->
+            items(scanResults?.size ?: 0) { index ->
                 Column {
                     Column(
                         modifier = Modifier
                             .clickable {
-                                val device: BluetoothDevice? = scanResults.get(key = key)
-                                onClick(device)
+                                model.beaconFilter.postValue(scanResults?.elementAt(index))
+                                model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
+                                model.stopScanBeacons(mBluetoothAdapter.bluetoothLeScanner)
+                                model.messages.postValue(listOf(""))
+                                navController.navigate(Screen.ChatWindow.route)
                             }
                             .background(color = randomBack, shape = RoundedCornerShape(10.dp))
                             .fillMaxWidth()
                             .padding(7.dp)
                     ) {
                         Text(
-                            text = scanResults[key]?.name ?: "Unknown Device",
-                            color = randomTeksti
-                        )
-                        Spacer(modifier = Modifier.size(10.dp))
-                        Text(
-                            text = scanResults[key]?.address ?: "",
-                            fontWeight = FontWeight.Light,
+                            text = scanResults?.elementAt(index) ?: "Unknown Device",
                             color = randomTeksti
                         )
                     }
                     Spacer(modifier = Modifier.size(10.dp))
                 }
-            }*/
+            }
+//            itemsIndexed(scanResults.keys.toList()) { _, key ->
+//                Column {
+//                    Column(
+//                        modifier = Modifier
+//                            .clickable {
+//                                val device: BluetoothDevice? = scanResults.get(key = key)
+//                                onClick(device)
+//                            }
+//                            .background(color = randomBack, shape = RoundedCornerShape(10.dp))
+//                            .fillMaxWidth()
+//                            .padding(7.dp)
+//                    ) {
+//                        Text(
+//                            text = scanResults[key]?.name ?: "Unknown Device",
+//                            color = randomTeksti
+//                        )
+//                        Spacer(modifier = Modifier.size(10.dp))
+//                        Text(
+//                            text = scanResults[key]?.address ?: "",
+//                            fontWeight = FontWeight.Light,
+//                            color = randomTeksti
+//                        )
+//                    }
+//                    Spacer(modifier = Modifier.size(10.dp))
+//                }
+//            }
+//        }
         }
     }
-
-    @SuppressLint("MissingPermission")
-    @Composable
-    fun DeviceScan() {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Text(
-                            text = "Scanning for devices",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Light
-                        )
-                    }
+        @SuppressLint("MissingPermission")
+        @Composable
+        fun DeviceScan() {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(
+                        text = "Scanning for devices",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Light
+                    )
                 }
-
             }
+
+        }

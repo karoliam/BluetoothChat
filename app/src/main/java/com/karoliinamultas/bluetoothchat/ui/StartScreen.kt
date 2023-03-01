@@ -1,5 +1,6 @@
 package com.karoliinamultas.bluetoothchat.ui
 
+import android.bluetooth.BluetoothAdapter
 import androidx.compose.animation.VectorConverter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,12 +24,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
 
 
 @Composable
-    fun StartScreen(navController: NavController){
+    fun StartScreen(navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel){
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(Color(0xFFD3D3D3))
@@ -51,7 +53,10 @@ import com.karoliinamultas.bluetoothchat.Screen
                     Modifier
                         .align(CenterHorizontally)
                         .padding(0.dp, 480.dp, 0.dp, 80.dp), fontSize = 14.sp, color = Color.Black)
-                Text("Start", Modifier.clickable { navController.navigate(Screen.ShowChats.route) }.align(CenterHorizontally), color = Color.Black, fontSize = 20.sp)
+                Text("Start", Modifier.clickable {
+                    navController.navigate(Screen.ShowChats.route)
+                    model.scanBeacons(mBluetoothAdapter.bluetoothLeScanner)
+                }.align(CenterHorizontally), color = Color.Black, fontSize = 20.sp)
             }
         }
     }
