@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         mBluetoothAdapter = bluetoothManager.adapter
         val model = MyViewModel(mBluetoothAdapter!!)
         setContent {
-            //Navi
+            //Navia
             val navController = rememberNavController()
             BluetoothChatTheme() {
                 val result = remember { mutableStateOf<Int?>(100) }
