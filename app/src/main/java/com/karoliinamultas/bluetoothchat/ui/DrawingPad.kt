@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import android.view.MotionEvent
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,12 +50,48 @@ fun DrawingPad(context: Context, navController: NavController) {
     val drawColor = remember { mutableStateOf(Color.Black) }
     val drawBrush = remember { mutableStateOf(5f) }
     val path = remember { mutableStateOf(mutableListOf<PathState>()) }
-
+    val showTools = remember {mutableStateOf(true)}
+    val density = LocalDensity.current
 
     Scaffold(
         topBar = {
-            DrawingTools(drawColor, drawBrush, path, navController)
-        }
+            Column(modifier = Modifier.fillMaxSize(),
+             verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.End) {
+
+                Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                    IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }, modifier = Modifier.padding(8.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back button",
+                        )
+                    }
+                    TextButton(onClick = {
+                        showTools.value = !showTools.value
+                    }, modifier = Modifier.padding(end = 8.dp)) {
+                        if(showTools.value)
+                            Text(text = "Hide tools")
+                        else {
+                            Text(text = "Show tools")
+                        }
+                    }
+                }
+                        AnimatedVisibility(visible = showTools.value,
+                        enter = slideInHorizontally {
+                            with(density) {-40.dp.roundToPx()}
+                        } + expandHorizontally (
+                            expandFrom = Alignment.Start
+                                )
+                        + fadeIn(
+                            initialAlpha = 0.6f
+                        ),
+                            exit = slideOutHorizontally() + shrinkHorizontally() + fadeOut()
+                        ) {
+                            DrawingTools(drawColor, drawBrush, path, navController)
+                        }
+                    }
+            }
     ) {
         Column{
             PaintBody(path, context, drawColor, drawBrush)
@@ -88,24 +124,17 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
         purpleColor,
         brownColor
     )
-    val strokes = remember { (1..25 step 5).toList() }
+    val strokes = remember { (1..30 step 5).toList() }
     var isClicked = remember { mutableStateOf(false)}
     val strokeMap: MutableMap<Int, Boolean> = remember {mutableStateMapOf()}
 
-    fun changeCircleToRectangle() {
+    fun addStrokesToMap() {
         strokes.forEach {
             strokeMap[it] = false
         }
     }
     Column(modifier = Modifier.fillMaxSize()) {
         Row() {
-            IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }, modifier = Modifier.padding(8.dp)) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back button",
-                    modifier = Modifier.size(42.dp)
-                )
-            }
             LazyRow(modifier = Modifier.fillMaxWidth()) {
                 items(colorList) { color ->
                     IconButton(
@@ -131,7 +160,7 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
             items(strokes) { stroke ->
                 IconButton(
                     onClick = {
-                        changeCircleToRectangle()
+                        addStrokesToMap()
                         drawBrush.value = stroke.toFloat()
                         strokeMap[stroke] = true
                     },
@@ -161,18 +190,20 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.highlighter_size_4_40px),
                     contentDescription = "Eraser",
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(start = 8.dp)
                 )
             }
-
             IconButton(onClick = {
                 path.value = mutableListOf()
             }) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = "Delete",
-                    modifier = Modifier.size(42.dp)
-                        .padding(8.dp)
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(start = 8.dp)
                 )
             }
         }
@@ -258,15 +289,17 @@ fun DrawingCanvas(
             }
         }
     }
-    Button(onClick = {captureController.capture()}, modifier = Modifier.offset(y=128.dp, x = 100.dp)) {
+Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.End){
+    FloatingActionButton(onClick = { captureController.capture() }, modifier = Modifier.padding(24.dp)) {
         Text(text = "Save")
     }
+}
     // When Ticket's Bitmap image is captured, show preview in dialog
     canvasBitmap?.let { bitmap ->
         Dialog(onDismissRequest = { }) {
             Column(
                 modifier = Modifier
-                    .background(Color.LightGray)
+                    .background(Color.White)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
