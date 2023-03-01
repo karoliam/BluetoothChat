@@ -25,6 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -171,7 +172,7 @@ fun Chats( modifier: Modifier = Modifier, navController: NavController,mBluetoot
 fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    var text by remember { mutableStateOf(TextFieldValue("")) }
+    var text by rememberSaveable { mutableStateOf("") }
 
     //BotMenu
     // Declaring a Boolean value to
@@ -277,7 +278,10 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                 )
 
                 IconButton(
-                    onClick = {  model.sendMessage(mBluetoothAdapter.bluetoothLeAdvertiser, mBluetoothAdapter.bluetoothLeScanner, text.text, "") },
+                    onClick = {
+                        model.sendMessage(mBluetoothAdapter.bluetoothLeAdvertiser, mBluetoothAdapter.bluetoothLeScanner, text, "")
+                        text = ""
+                              },
                     modifier = Modifier
                         .height(60.dp)
                         .width(60.dp)
