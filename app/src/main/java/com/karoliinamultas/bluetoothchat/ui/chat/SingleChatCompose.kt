@@ -1,10 +1,13 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.media.Image
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.material3.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +40,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -173,7 +177,6 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     var text by rememberSaveable { mutableStateOf("") }
-
     //BotMenu
     // Declaring a Boolean value to
     // store bottom sheet collapsed state
@@ -279,8 +282,12 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
                 IconButton(
                     onClick = {
+                        if(!model.mSending.value!!){
                         model.sendMessage(mBluetoothAdapter.bluetoothLeAdvertiser, mBluetoothAdapter.bluetoothLeScanner, text, "")
                         text = ""
+                        } else {
+                            Toast.makeText(context, "sending message", Toast.LENGTH_SHORT).show()
+                        }
                               },
                     modifier = Modifier
                         .height(60.dp)
@@ -294,6 +301,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         )
                     }
                 )
+
 
                 IconButton(
                     onClick = { coroutineScope.launch {

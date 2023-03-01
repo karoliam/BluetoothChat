@@ -23,6 +23,7 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
     var uuids : List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
+    var mSending = MutableLiveData<Boolean>(false)
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
 
@@ -109,6 +110,7 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
 
         }
     }
+    @SuppressLint("MissingPermission")
     fun stopScanBeacons(mBluetoothLeScanner: BluetoothLeScanner){
         mBluetoothLeScanner.stopScan(leScanCallbackBeacons)
     }
@@ -132,8 +134,9 @@ fun sendMessage(bluetoothLeAdvertiser:BluetoothLeAdvertiser, bluetoothLeScanner:
         .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
         .build()
 
-    stopScan(bluetoothLeScanner)
     viewModelScope.launch(Dispatchers.IO) {
+        mSending.postValue(true)
+        stopScan(bluetoothLeScanner)
         bluetoothLeAdvertiser.startAdvertisingSet(
             parameters.build(),
             data,
@@ -144,6 +147,7 @@ fun sendMessage(bluetoothLeAdvertiser:BluetoothLeAdvertiser, bluetoothLeScanner:
         )
         delay(MESSAGE_PERIOD)
         bluetoothLeAdvertiser.stopAdvertisingSet(callback)
+        mSending.postValue(false)
         scanDevices(bluetoothLeScanner)
     }
 }

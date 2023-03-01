@@ -175,7 +175,9 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
                     CircularProgressIndicator()
+
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(
                         text = "Scanning for devices",
