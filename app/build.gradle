@@ -59,6 +59,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
     implementation 'androidx.core:core-ktx:1.7.0'
 
+
+    // Image compressor
+    implementation 'id.zelory:compressor:3.0.1'
+
     //Status bar
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 

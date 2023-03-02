@@ -3,6 +3,7 @@ package com.karoliinamultas.bluetoothchat.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.*
@@ -30,10 +31,15 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import coil.decode.BitmapFactoryDecoder
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
 import dev.shreyaspatil.capturable.Capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.io.ByteArrayOutputStream
 
 
@@ -47,7 +53,7 @@ data class PathState(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawingPad(context: Context, navController: NavController) {
-    val drawColor = remember { mutableStateOf(Color.Black) }
+    val drawColor = remember { mutableStateOf(Color.Magenta) }
     val drawBrush = remember { mutableStateOf(5f) }
     val path = remember { mutableStateOf(mutableListOf<PathState>()) }
     val showTools = remember {mutableStateOf(true)}
@@ -102,7 +108,7 @@ fun DrawingPad(context: Context, navController: NavController) {
 
 @Composable
 fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>, path: MutableState<MutableList<PathState>>, navController: NavController) {
-    val blackColor = Color.Black
+//    val blackColor = Color.Black
     val blueColor = Color.Blue
     val greenColor = Color.Green
     val pinkColor = Color(255, 163, 165)
@@ -114,7 +120,7 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
     val eraser = Color.White
 
     val colorList = listOf(
-        blackColor,
+//        blackColor,
         blueColor,
         redColor,
         magentaColor,
@@ -231,11 +237,7 @@ fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, draw
 
 
 
-fun bitmapToByteArray(bitmap: Bitmap, format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG, quality: Int = 100): ByteArray {
-    val outputStream = ByteArrayOutputStream()
-    bitmap.compress(format, quality, outputStream)
-    return outputStream.toByteArray()
-}
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -249,12 +251,19 @@ fun DrawingCanvas(
     val movePath = remember { mutableStateOf<Offset?>(null) }
     val captureController = rememberCaptureController()
     var canvasBitmap: ImageBitmap? by remember { mutableStateOf(null) }
-
+    val viewModel = DrawingPadViewModel(context)
+    var compressedBitmap = remember { mutableStateOf(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)) }
+    var isClicked = remember {mutableStateOf(false)}
+    compressedBitmap.value = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true)
+    Column(modifier = Modifier.fillMaxSize(),
+verticalArrangement = Arrangement.Center,
+horizontalAlignment = Alignment.CenterHorizontally) {
     Capturable(controller = captureController, onCaptured = { bitmap, error -> canvasBitmap = bitmap }
     ) {
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(top = 100.dp)
                 .pointerInteropFilter {
                     when (it.action) {
@@ -289,8 +298,14 @@ fun DrawingCanvas(
             }
         }
     }
-Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.End){
-    FloatingActionButton(onClick = { captureController.capture() }, modifier = Modifier.padding(24.dp)) {
+    }
+Column(
+    modifier = Modifier.fillMaxSize(),
+    verticalArrangement = Arrangement.Bottom,
+    horizontalAlignment = Alignment.End){
+    FloatingActionButton(
+        onClick = { captureController.capture() },
+        modifier = Modifier.padding(24.dp)) {
         Text(text = "Save")
     }
 }
@@ -305,19 +320,37 @@ Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bott
             ) {
                 Text("Preview of Canvas image \uD83D\uDC47")
                 Spacer(Modifier.size(16.dp))
+
                 Image(
-                    bitmap = bitmap,
+                    bitmap = if(!isClicked.value) {
+                        bitmap
+                    } else {
+                           compressedBitmap.value.asImageBitmap()
+                           }
+                   ,
                     contentDescription = "Preview of canvas",
+                    modifier = Modifier.size(400.dp)
                 )
                 Spacer(Modifier.size(4.dp))
                 Button(onClick = {
-                    canvasBitmap = null
-                    val byteArray = bitmapToByteArray(bitmap.asAndroidBitmap())
-                    Log.d("DBG", "bytearray $byteArray")
+//                    canvasBitmap = null
+                    isClicked.value = true
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val byteArray = viewModel.bitmapToByteArray(bitmap.asAndroidBitmap())
+                        Log.d("DBG", "byteArray before compress ${byteArray.size}")
+                        val compressed = viewModel.compressByteArray(byteArray)
+                        Log.d("DBG", "compress ${compressed.size}")
+                        val decompressed = viewModel.decompressByteArray(compressed)
+                        Log.d("DBG", "decompressed ${decompressed.size}")
+                        val byteArrayToBitmapDeCompressed = BitmapFactory.decodeByteArray(decompressed, 0, decompressed.size)
+                        compressedBitmap.value =  byteArrayToBitmapDeCompressed
+                        Log.d("DBG", "final value ${viewModel.bitmapToByteArray(compressedBitmap.value).size}")
+                    }
                 }
                 ) {
                     Text("Close Preview")
                 }
+
             }
         }
     }
