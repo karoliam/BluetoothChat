@@ -356,7 +356,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         .height(60.dp)
                         .width(60.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
                     content = {
                         Icon(
                             imageVector = Icons.Filled.Send,
@@ -366,28 +366,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                 )
 
 
-                IconButton(
-                    onClick = { coroutineScope.launch {
-                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
-                            bottomSheetScaffoldState.bottomSheetState.expand()
-                        }else{
-                            bottomSheetScaffoldState.bottomSheetState.collapse()
-                        }
-                    } },
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(60.dp)
-                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Filled.KeyboardArrowUp,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                )
 
-                //CameraButton(context)
+
 
             }}
     }
