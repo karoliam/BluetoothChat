@@ -1,5 +1,7 @@
 package com.karoliinamultas.bluetoothchat
 
+
+
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -9,13 +11,17 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
 
-class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
+class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
+
+    private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
     lateinit var currentAdvertisingSet: AdvertisingSet
     var messages = MutableLiveData<List<String>>(listOf("message"))
     var beacons = MutableLiveData<Set<String>>(setOf("chat for debugging if no beacon"))
