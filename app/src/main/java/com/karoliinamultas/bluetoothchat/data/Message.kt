@@ -9,4 +9,5 @@ data class Message(
     val message_uuid: String,
     val message_content: String,
     val chat_id: String,
+    val local_message: Boolean,
 )
