@@ -9,13 +9,17 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
 
-class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
+class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
+
+    private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
     lateinit var currentAdvertisingSet:AdvertisingSet
     var messages = MutableLiveData<List<String>>(listOf("message"))
     var uuids : List<String> = listOf("uuids")

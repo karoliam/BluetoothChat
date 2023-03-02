@@ -1,5 +1,6 @@
 package com.karoliinamultas.bluetoothchat.data
 
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 
 interface AppContainer {
