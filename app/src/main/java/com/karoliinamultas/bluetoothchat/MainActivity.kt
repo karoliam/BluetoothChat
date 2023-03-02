@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,9 +46,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
+        val model = MyViewModel(mBluetoothAdapter!!)
+
         setContent {
-            val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            //Navi
+            //Navia
             val navController = rememberNavController()
             BluetoothChatTheme() {
                 val result = remember { mutableStateOf<Int?>(100) }
@@ -81,30 +81,30 @@ class MainActivity : ComponentActivity() {
                         .check()
                 }
 
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        val context = LocalContext.current
-                        NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
-                            composable(route = Screen.StartScreen.route){
-                                StartScreen(navController = navController)
-                            }
-                            composable(route = Screen.ShowChats.route) {
-                                ShowChats(navController = navController, mBluetoothAdapter!!, model)
-                            }
-                            composable(route = Screen.ChatWindow.route){
-                                ChatWindow(navController = navController, mBluetoothAdapter!!, model)
-                            }
-                            composable(route = Screen.DrawingPad.route){
-                                DrawingPad(context, navController = navController)
-                            }
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val context = LocalContext.current
+                    NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
+                        composable(route = Screen.StartScreen.route){
+                            StartScreen(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.ShowChats.route) {
+                            ShowChats(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.ChatWindow.route){
+                            ChatWindow(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.DrawingPad.route){
+                            DrawingPad(context, navController = navController)
                         }
                     }
                 }
             }
         }
+    }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
@@ -119,4 +119,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    }
+}
