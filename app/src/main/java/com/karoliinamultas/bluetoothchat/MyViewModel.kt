@@ -16,11 +16,11 @@ import java.nio.charset.Charset
 import java.util.*
 
 class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
-    lateinit var currentAdvertisingSet:AdvertisingSet
+    lateinit var currentAdvertisingSet: AdvertisingSet
     var messages = MutableLiveData<List<String>>(listOf("message"))
-    var beacons = MutableLiveData<Set<String>>(setOf())
+    var beacons = MutableLiveData<Set<String>>(setOf("chat for debugging if no beacon"))
     var beaconFilter = MutableLiveData<String>("")
-    var uuids : List<String> = listOf("uuids")
+    var uuids: List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
     var mSending = MutableLiveData<Boolean>(false)
@@ -38,25 +38,42 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
         .setPrimaryPhy(BluetoothDevice.PHY_LE_1M)
         .setSecondaryPhy(BluetoothDevice.PHY_LE_2M)
 
-//    callBack is what triggers when scanner found needed service uuid
+    //    callBack is what triggers when scanner found needed service uuid
     private val leScanCallback: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {super.onScanResult(callbackType, result)
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
             val serviceData = result.scanRecord?.getServiceData(ParcelUuid(UUID_APP_SERVICE))
-            Log.d("hei", String(serviceData?: "t".toByteArray(Charsets.UTF_8), Charset.defaultCharset()))
-            val splitMessage = String(serviceData?: "".toByteArray(Charsets.UTF_8), Charset.defaultCharset()).split("//")
-            if(!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0])){
-            messages.postValue(messages.value?.plus(splitMessage[2]))
-            uuids += splitMessage[0]
-            Log.d("hei", uuids.toString())
-                sendMessage(mBluetoothAdapter.bluetoothLeAdvertiser, mBluetoothAdapter.bluetoothLeScanner, splitMessage[2], splitMessage[1])
+            Log.d(
+                "hei",
+                String(serviceData ?: "t".toByteArray(Charsets.UTF_8), Charset.defaultCharset())
+            )
+            val splitMessage = String(
+                serviceData ?: "".toByteArray(Charsets.UTF_8),
+                Charset.defaultCharset()
+            ).split("//")
+            if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0])) {
+                messages.postValue(messages.value?.plus(splitMessage[2]))
+                uuids += splitMessage[0]
+                Log.d("hei", uuids.toString())
+                sendMessage(
+                    mBluetoothAdapter.bluetoothLeAdvertiser,
+                    mBluetoothAdapter.bluetoothLeScanner,
+                    splitMessage[2],
+                    splitMessage[1]
+                )
             }
         }
     }
     private val leScanCallbackBeacons: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {super.onScanResult(callbackType, result)
-            if (result.scanRecord?.deviceName?.contains("btchat") ?: false){
-                beacons.postValue(beacons.value?.plus(result.scanRecord?.deviceName?.split("//")?.get(0) ?: "no beacons"))
-            Log.d("beacon", "beacon found ${result.scanRecord?.deviceName}")
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+            if (result.scanRecord?.deviceName?.contains("btchat") ?: false) {
+                beacons.postValue(
+                    beacons.value?.plus(
+                        result.scanRecord?.deviceName?.split("//")?.get(0) ?: "no beacons"
+                    )
+                )
+                Log.d("beacon", "beacon found ${result.scanRecord?.deviceName}")
             }
         }
     }
@@ -80,8 +97,9 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
     }
 
     @SuppressLint("MissingPermission")
-    fun scanBeacons(bluetoothLeScanner: BluetoothLeScanner){
-        var filterList:List<ScanFilter> = listOf()
+    fun scanBeacons(bluetoothLeScanner: BluetoothLeScanner) {
+        var filterList: List<ScanFilter> = listOf()
+
         //        Scan filter and options to filter for
         @SuppressLint("SuspiciousIndentation")
         fun buildScanFilters(): List<ScanFilter> {
@@ -92,7 +110,7 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
             val filter = builder.build()
             return listOf(filter)
         }
-        if (filterList.isEmpty()){
+        if (filterList.isEmpty()) {
             filterList = buildScanFilters()
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -106,69 +124,80 @@ class MyViewModel(mBluetoothAdapter: BluetoothAdapter) : ViewModel() {
                 .setReportDelay(0)
                 .build()
 
-            bluetoothLeScanner.startScan(null,settings, leScanCallbackBeacons)
+            bluetoothLeScanner.startScan(null, settings, leScanCallbackBeacons)
 
         }
     }
+
     @SuppressLint("MissingPermission")
-    fun stopScanBeacons(mBluetoothLeScanner: BluetoothLeScanner){
+    fun stopScanBeacons(mBluetoothLeScanner: BluetoothLeScanner) {
         mBluetoothLeScanner.stopScan(leScanCallbackBeacons)
     }
-@SuppressLint("MissingPermission")
-fun sendMessage(bluetoothLeAdvertiser:BluetoothLeAdvertiser, bluetoothLeScanner: BluetoothLeScanner, message:String, uuid: String){
-    val buildMessage: String
-    if (uuid.isEmpty()){
-     val uuidl = UUID.randomUUID().toString()
-     buildMessage =  beaconFilter.value + "//" + uuidl + "//" + message
-     uuids += uuidl
-    Log.d("uid",uuidl)
-    } else {
-        buildMessage = beaconFilter.value + "//"+ uuid + "//" + message
-    uuids += uuid
-    }
-    messages.postValue(messages.value?.plus(message))
-    Log.d("message size", buildMessage.toByteArray().size.toString())
-    val data = AdvertiseData.Builder()
-        .setIncludeDeviceName( true )
-        .addServiceData(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")), buildMessage.toByteArray(Charsets.UTF_8))
-        .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
-        .build()
 
-    viewModelScope.launch(Dispatchers.IO) {
-        mSending.postValue(true)
-        stopScan(bluetoothLeScanner)
-        bluetoothLeAdvertiser.startAdvertisingSet(
-            parameters.build(),
-            data,
-            null,
-            null,
-            null,
-            callback
-        )
-        delay(MESSAGE_PERIOD)
-        bluetoothLeAdvertiser.stopAdvertisingSet(callback)
-        mSending.postValue(false)
-        scanDevices(bluetoothLeScanner)
+    @SuppressLint("MissingPermission")
+    fun sendMessage(
+        bluetoothLeAdvertiser: BluetoothLeAdvertiser,
+        bluetoothLeScanner: BluetoothLeScanner,
+        message: String,
+        uuid: String
+    ) {
+        val buildMessage: String
+        if (uuid.isEmpty()) {
+            val uuidl = UUID.randomUUID().toString()
+            buildMessage = beaconFilter.value + "//" + uuidl + "//" + message
+            uuids += uuidl
+            Log.d("uid", uuidl)
+        } else {
+            buildMessage = beaconFilter.value + "//" + uuid + "//" + message
+            uuids += uuid
+        }
+        messages.postValue(messages.value?.plus(message))
+        Log.d("message size", buildMessage.toByteArray().size.toString())
+        val data = AdvertiseData.Builder()
+            .setIncludeDeviceName(true)
+            .addServiceData(
+                ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")),
+                buildMessage.toByteArray(Charsets.UTF_8)
+            )
+            .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
+            .build()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            mSending.postValue(true)
+            stopScan(bluetoothLeScanner)
+            bluetoothLeAdvertiser.startAdvertisingSet(
+                parameters.build(),
+                data,
+                null,
+                null,
+                null,
+                callback
+            )
+            delay(MESSAGE_PERIOD)
+            bluetoothLeAdvertiser.stopAdvertisingSet(callback)
+            mSending.postValue(false)
+            scanDevices(bluetoothLeScanner)
+        }
     }
-}
 
 
     //    Scanner with settings to follow specifis service uuid
     @SuppressLint("MissingPermission")
-    fun scanDevices(bluetoothLeScanner:BluetoothLeScanner) {
+    fun scanDevices(bluetoothLeScanner: BluetoothLeScanner) {
 
-        var filterList:List<ScanFilter> = listOf()
-//        Scan filter and options to filter for
-@SuppressLint("SuspiciousIndentation")
-fun buildScanFilters(): List<ScanFilter> {
-        val builder = ScanFilter.Builder()
+        var filterList: List<ScanFilter> = listOf()
+
+        //        Scan filter and options to filter for
+        @SuppressLint("SuspiciousIndentation")
+        fun buildScanFilters(): List<ScanFilter> {
+            val builder = ScanFilter.Builder()
             builder.setServiceUuid(ParcelUuid(UUID_APP_SERVICE))
 //            builder.setServiceData(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
 //            builder.setDeviceName("PAVEL")
             val filter = builder.build()
             return listOf(filter)
         }
-        if (filterList.isEmpty()){
+        if (filterList.isEmpty()) {
             filterList = buildScanFilters()
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -182,25 +211,26 @@ fun buildScanFilters(): List<ScanFilter> {
                 .setReportDelay(0)
                 .build()
 
-            bluetoothLeScanner.startScan(filterList,settings, leScanCallback)
+            bluetoothLeScanner.startScan(filterList, settings, leScanCallback)
 
         }
     }
+
     @SuppressLint("MissingPermission")
-    fun stopScan(bluetoothLeScanner: BluetoothLeScanner){
+    fun stopScan(bluetoothLeScanner: BluetoothLeScanner) {
         fScanning.postValue(false)
         scanResults.postValue(mResults.values.toList())
         viewModelScope.launch(Dispatchers.IO) {
-        bluetoothLeScanner.stopScan(leScanCallback)
+            bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
+
     companion object GattAttributes {
         const val SCAN_PERIOD: Long = 10000
-        const val MESSAGE_PERIOD: Long= 700
+        const val MESSAGE_PERIOD: Long = 700
         const val STATE_CONNECTING = 1
         const val STATE_CONNECTED = 2
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
         val UUID_APP_DATA = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
-
     }
 }
