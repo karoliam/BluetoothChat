@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
 
-class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
+private const val TAG = "MyViewModelTAG"
+class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
@@ -153,9 +155,25 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
             buildMessage = beaconFilter.value + "//" + uuidl + "//" + message
             uuids += uuidl
             Log.d("uid", uuidl)
+            viewModelScope.launch {
+                saveMessageToDatabase(
+                    uuidl,
+                    message,
+                    beaconFilter.value.toString(),
+                    true
+                )
+            }
         } else {
             buildMessage = beaconFilter.value + "//" + uuid + "//" + message
             uuids += uuid
+            viewModelScope.launch {
+                saveMessageToDatabase(
+                    uuid,
+                    message,
+                    beaconFilter.value.toString(),
+                    false
+                )
+            }
         }
         messages.postValue(messages.value?.plus(message))
         Log.d("message size", buildMessage.toByteArray().size.toString())
@@ -167,6 +185,8 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
             )
             .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
             .build()
+        Log.d(TAG, "uuid: $buildMessage")
+        Log.d(TAG, "message: $message")
 
         viewModelScope.launch(Dispatchers.IO) {
             mSending.postValue(true)
@@ -238,5 +258,21 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
         const val STATE_CONNECTED = 2
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
         val UUID_APP_DATA = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
+    }
+
+    suspend fun saveMessageToDatabase(
+        messageUuid: String,
+        messageContent: String,
+        chatId: String,
+        localMessage: Boolean
+    ) {
+        messagesRepository.insertMessage(
+            Message(
+                messageUuid,
+                messageContent,
+                chatId,
+                localMessage
+            )
+        )
     }
 }
