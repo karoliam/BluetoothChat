@@ -3,19 +3,25 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.TopAppBar
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,37 +38,48 @@ private const val TAG = "DeviceScanCompose"
 fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel){
     //Statusbar
     val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
+    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surface)
+    // Create a boolean variable
+    // to store the display menu state
+    var mDisplayMenu by remember { mutableStateOf(false) }
+
+    // fetching local context
+    val mContext = LocalContext.current
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
+            TopAppBar(
+                elevation = 5.dp,
+                backgroundColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
                         "Restroom Chat",
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 20.sp,
                     )
                 },
-                /*navigationIcon = {
-                    IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back button"
-                        )
-                    }
-                },*/
                 actions = {
-                    IconButton(onClick = { /* doSomething() */ }) {
+                    // Creating Icon button for dropdown menu
+                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
                             contentDescription = "Menu button"
                         )
+                    }
+
+                    DropdownMenu(
+                        expanded = mDisplayMenu,
+                        onDismissRequest = { mDisplayMenu = false }
+                    ) {
+                        // Creating dropdown menu item, on click
+                        // would create a Toast message
+                        androidx.compose.material.DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
+                            Text(text = "Settings")
+                        }
+                        androidx.compose.material.DropdownMenuItem(onClick = {  }){
+                            Text(text = "About")
+                        }
                     }
                 },
             )

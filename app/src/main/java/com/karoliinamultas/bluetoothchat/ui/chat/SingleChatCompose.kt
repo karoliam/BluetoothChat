@@ -31,8 +31,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -66,21 +75,29 @@ private const val TAG = "ChatCompose"
 fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter, model:MyViewModel){
     //Statusbar
     val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
+    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surface)
+    // Create a boolean variable
+    // to store the display menu state
+    var mDisplayMenu by remember { mutableStateOf(false) }
+
+    // fetching local context
+    val mContext = LocalContext.current
+    //Topbar
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
+            TopAppBar(
+                elevation = 5.dp,
+                backgroundColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
                         "Restroom Chat",
+                        Modifier.padding(40.dp, 0.dp),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center
                     )
                 },
                 navigationIcon = {
@@ -117,21 +134,21 @@ fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter
 @Composable
 fun ShowChat(message:String, modifier: Modifier = Modifier) {
 
-    val tekstit = listOf(
+    val textColors_random = listOf(
         Color(0xFF00FDDC),
         Color(0xFFFF729F),
         Color(0xFF04E762),
         Color(0xFFFDE74C),
         Color(0xFFFF4365))
-    val randomTeksti = tekstit.random()
+    val randomTexts = textColors_random.random()
 
-    val backgroundit = listOf(
+    val backgroundColors_random = listOf(
         Color(0xFF111D4A),
         Color(0xFF43AA8B),
         Color(0xFF8B635C),
         Color(0xFF60594D),
         Color(0xFF93A29B))
-    val randomBack = backgroundit.random()
+    val randomBack = backgroundColors_random.random()
 
     Row(
         modifier = Modifier
@@ -147,7 +164,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
             colors = CardDefaults.cardColors(containerColor = randomBack),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            Text(text = message, color = randomTeksti, modifier = Modifier.padding(10.dp))
+            Text(text = message, color = randomTexts, modifier = Modifier.padding(10.dp))
         }
     }
 }
@@ -163,7 +180,7 @@ fun Chats( modifier: Modifier = Modifier, navController: NavController,mBluetoot
     Column(modifier = Modifier.fillMaxSize()) {
 
         Surface(modifier = Modifier
-            .padding(all = Dp(5f))
+            .padding(all = Dp(0f))
             .fillMaxHeight(fraction = 0.89f)) {
             ChatsList(model)
         }
@@ -246,39 +263,85 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
             },
             sheetPeekHeight = 0.dp
         ){
-        Box(
-            Modifier
-                .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f))) {
-            Row(
-                Modifier
-                    .padding(5.dp)
-            ) {
-                TextField(
-                    value = text,
-                    onValueChange = {
-                        text = it
-                    },
+                Box(
                     Modifier
-                        .width(265.dp)
-                        .padding(5.dp),
-                    shape = RoundedCornerShape(5.dp),
-                    placeholder = { Text(text = "Enter your message") },
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        autoCorrect = true,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done,
-                    ),
-                    textStyle = TextStyle(
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = TextUnit.Unspecified,
-                        fontFamily = FontFamily.SansSerif
-                    ),
-                    maxLines = 1,
-                    singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(containerColor = MaterialTheme.colorScheme.background)
-                )
+                        .drawWithCache {
+                            val offsetY = (-5).dp.toPx()
+                            val shadowColor = Color.Black
+                            val shadowAlpha = 0.3f
+                            val shadowBlur = 6.dp.toPx()
+                            onDrawWithContent {
+                                drawContent()
+                                drawRect(
+                                    shadowColor.copy(alpha = shadowAlpha),
+                                    Offset(0f, offsetY),
+                                    size = Size(size.width, shadowBlur),
+                                    alpha = shadowAlpha,
+                                    style = Fill
+                                )
+                            }
+                        }
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .fillMaxWidth()) {
+                    Row(
+                        Modifier
+                            .padding(5.dp)
+                            .fillMaxWidth()
+                    ) {
+                        TextField(
+                            value = text,
+                            onValueChange = {
+                                text = it
+                            },
+                            Modifier
+                                .weight(9f)
+                                .padding(5.dp),
+                            shape = RoundedCornerShape(5.dp),
+                            placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = { coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        }else{
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        }
+                                    } },
+                                    modifier = Modifier
+                                        .height(60.dp)
+                                        .width(60.dp)
+                                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
+                                    content = {
+                                        Icon(
+                                            imageVector = Icons.Filled.KeyboardArrowUp,
+                                            contentDescription = "Localized description"
+                                        )
+                                    }
+                                )
+                            },
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.None,
+                                autoCorrect = true,
+                                keyboardType = KeyboardType.Text,
+                                imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                            ),
+                            textStyle = TextStyle(
+                                color = Color(0xFF242124),
+                                fontSize = TextUnit.Unspecified,
+                                fontFamily = FontFamily.SansSerif
+                            ),
+                            maxLines = 1,
+                            singleLine = true,
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(0xFFF5FEFD),
+                                textColor = Color(0xFF242124),
+                                disabledTextColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent)
+                        )
 
                 IconButton(
                     onClick = {
