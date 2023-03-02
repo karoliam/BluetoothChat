@@ -92,7 +92,7 @@ fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter
                         Modifier.padding(40.dp, 0.dp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         textAlign = TextAlign.Center
                     )
                 },

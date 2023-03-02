@@ -50,7 +50,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                         "Restroom Chat",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                     )
                 },
                 actions = {
