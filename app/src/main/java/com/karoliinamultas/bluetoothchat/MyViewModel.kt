@@ -34,6 +34,7 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
 
 
+
     // Create an AdvertiseData object to include data in the advertisement
 
 

@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -129,7 +130,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
 //                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
         LazyColumn(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(40.dp, 30.dp, 40.dp, 15.dp)
                 .fillMaxWidth()
         ) {
             items(scanResults?.size ?: 0) { index ->
@@ -144,15 +145,17 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 navController.navigate(Screen.ChatWindow.route)
                             }
                             .background(color = randomBack, shape = RoundedCornerShape(10.dp))
-                            .fillMaxWidth()
-                            .padding(7.dp)
+                            .fillMaxWidth(1f)
+                            .height(50.dp)
+                            .padding(12.dp)
                     ) {
                         Text(
                             text = scanResults?.elementAt(index) ?: "Unknown Device",
-                            color = randomTeksti
+                            color = randomTeksti,
+                            modifier = Modifier.align(CenterHorizontally)
                         )
                     }
-                    Spacer(modifier = Modifier.size(10.dp))
+                    Spacer(modifier = Modifier.size(15.dp))
                 }
             }
 //            itemsIndexed(scanResults.keys.toList()) { _, key ->
@@ -197,7 +200,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
 
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(
-                        text = "Scanning for devices",
+                        text = "Scanning for chats",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Light
                     )
