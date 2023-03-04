@@ -275,4 +275,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             )
         )
     }
+
+    fun deleteOldMessages(chatId: String) {
+        viewModelScope.launch {
+            deleteOtherMessagesFromDatabase(chatId)
+        }
+    }
+    suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
+        messagesRepository.deleteOtherChatMessages(chatId)
+    }
 }

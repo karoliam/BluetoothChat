@@ -15,4 +15,6 @@ interface MessagesRepository {
     suspend fun deleteAllChatMessages()
 
     suspend fun deleteSingleChatMessages(chatId: String)
+
+    suspend fun deleteOtherChatMessages(chatId: String)
 }

@@ -1,6 +1,7 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import android.widget.Toast
@@ -141,6 +142,8 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
                                 model.stopScanBeacons(mBluetoothAdapter.bluetoothLeScanner)
                                 model.messages.postValue(listOf(""))
+                                // delete other chat histories
+                                model.deleteOldMessages(scanResults?.elementAt(index).toString())
                                 navController.navigate(Screen.ChatWindow.route)
                             }
                             .background(color = randomBack, shape = RoundedCornerShape(10.dp))
