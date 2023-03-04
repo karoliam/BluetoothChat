@@ -49,6 +49,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
         </provider>
+        <service
+            android:name=".service.ChatForegroundService"
+            android:enabled="true"
+            android:exported="false" />
+
     </application>
 
 </manifest>

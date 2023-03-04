@@ -23,9 +23,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import com.karoliinamultas.bluetoothchat.ui.DrawingPad
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
 import com.karoliinamultas.bluetoothchat.ui.chat.ChatWindow
+import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapper
+import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import com.karoliinamultas.bluetoothchat.ui.chat.ShowChats
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
 import com.karumi.dexter.Dexter
@@ -44,8 +47,11 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
+        val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
+
         val model = MyViewModel(mBluetoothAdapter!!)
         setContent {
             //Navia
@@ -94,7 +100,7 @@ class MainActivity : ComponentActivity() {
                                 ShowChats(navController = navController, mBluetoothAdapter!!, model)
                             }
                             composable(route = Screen.ChatWindow.route){
-                                ChatWindow(navController = navController, mBluetoothAdapter!!, model)
+                                ChatWindow(navController = navController, notificationManagerWrapper, mBluetoothAdapter!!, model)
                             }
                             composable(route = Screen.DrawingPad.route){
                                 DrawingPad(context, navController = navController)

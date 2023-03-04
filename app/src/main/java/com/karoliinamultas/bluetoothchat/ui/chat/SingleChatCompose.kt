@@ -2,12 +2,7 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import android.bluetooth.BluetoothAdapter
-import android.media.Image
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,9 +23,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
@@ -43,22 +36,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
 import kotlinx.coroutines.launch
-import java.net.URL
 
 
 private const val TAG = "ChatCompose"
 
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter, model:MyViewModel){
+fun ChatWindow(navController: NavController, notificationManagerWrapper: NotificationManagerWrapper, mBluetoothAdapter: BluetoothAdapter, model:MyViewModel){
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.background)
@@ -101,7 +92,7 @@ fun ChatWindow(navController: NavController, mBluetoothAdapter: BluetoothAdapter
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats(Modifier, navController,mBluetoothAdapter, model)
+                Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model)
             }
         }
     )
@@ -114,7 +105,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
 
     val tekstit = listOf(
         Color(0xFF00FDDC),
-        Color(0xFFFF729F),
+        Color(0xFFFFFFFF),
         Color(0xFF04E762),
         Color(0xFFFDE74C),
         Color(0xFFFF4365))
@@ -123,9 +114,10 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
     val backgroundit = listOf(
         Color(0xFF111D4A),
         Color(0xFF43AA8B),
-        Color(0xFF8B635C),
-        Color(0xFF60594D),
-        Color(0xFF93A29B))
+        Color(0xFFE490C7),
+        Color(0xFFBEA06B),
+        Color(0xFFFF8963)
+    )
     val randomBack = backgroundit.random()
 
     Row(
@@ -149,7 +141,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun Chats( modifier: Modifier = Modifier, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
+fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: NotificationManagerWrapper, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
 
 
     val inputvalue = remember { mutableStateOf(TextFieldValue()) }
@@ -160,7 +152,7 @@ fun Chats( modifier: Modifier = Modifier, navController: NavController,mBluetoot
         Surface(modifier = Modifier
             .padding(all = Dp(5f))
             .fillMaxHeight(fraction = 0.89f)) {
-            ChatsList(model)
+            ChatsList(model, notificationManagerWrapper)
         }
         InputField( modifier, navController, mBluetoothAdapter, model)
     }
@@ -319,9 +311,15 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 }
 
 @Composable
-fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, modifier: Modifier = Modifier) {
+fun ChatsList(model: MyViewModel,notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier) {
     val valueList: List<String>? by model.messages.observeAsState()
-
+// Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
+    LaunchedEffect(valueList) {
+        if (!valueList.isNullOrEmpty()) {
+            // Value list has changed, show a notification
+            notificationManagerWrapper.showNotification("New message received", "You have a new message")
+        }
+    }
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         items(valueList?.size ?: 0) { index ->
             ShowChat(valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa")
