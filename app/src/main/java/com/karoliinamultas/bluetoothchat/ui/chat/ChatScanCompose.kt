@@ -143,7 +143,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 model.stopScanBeacons(mBluetoothAdapter.bluetoothLeScanner)
                                 model.messages.postValue(listOf(""))
                                 // delete other chat histories
-                                model.deleteOldMessages(scanResults?.elementAt(index).toString())
+                                model.chatRoomOnJoinDatabaseChanges(scanResults?.elementAt(index).toString())
                                 navController.navigate(Screen.ChatWindow.route)
                             }
                             .background(color = randomBack, shape = RoundedCornerShape(10.dp))

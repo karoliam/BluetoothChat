@@ -25,7 +25,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<String>>(listOf("message"))
+    var messages = MutableLiveData<List<String>>(listOf())
     var beacons = MutableLiveData<Set<String>>(setOf("chat for debugging if no beacon"))
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
@@ -34,6 +34,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var mSending = MutableLiveData<Boolean>(false)
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
+
+    data class MessagesDatabaseList(val messagesDatabaseList: List<Message> = listOf()) {
+        companion object {
+            var messagesDatabaseList = listOf<Message>()
+            var messageDatabaseContentString = listOf<String>()
+        }
+    }
 
 
     // Create an AdvertiseData object to include data in the advertisement
@@ -276,10 +283,16 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         )
     }
 
-    fun deleteOldMessages(chatId: String) {
+    fun chatRoomOnJoinDatabaseChanges(chatId: String) {
         viewModelScope.launch {
             deleteOtherMessagesFromDatabase(chatId)
+            getChatMessagesFromDatabase(chatId)
+            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
         }
+    }
+    suspend fun getChatMessagesFromDatabase(chatId: String) {
+        MessagesDatabaseList.messagesDatabaseList = messagesRepository.getChatMessages(chatId)
+        MessagesDatabaseList.messageDatabaseContentString = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
     }
     suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
         messagesRepository.deleteOtherChatMessages(chatId)
