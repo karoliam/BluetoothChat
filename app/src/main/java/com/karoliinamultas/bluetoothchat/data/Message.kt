@@ -11,3 +11,9 @@ data class Message(
     val chat_id: String,
     val local_message: Boolean,
 )
+
+data class MessagesDatabaseList(val messagesDatabaseList: List<Message> = listOf()) {
+    companion object {
+        var messagesDatabaseList = listOf<Message>()
+    }
+}

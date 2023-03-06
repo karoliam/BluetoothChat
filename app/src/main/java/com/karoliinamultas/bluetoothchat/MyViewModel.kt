@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karoliinamultas.bluetoothchat.data.Message
+import com.karoliinamultas.bluetoothchat.data.MessagesDatabaseList
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -35,11 +36,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
 
-    data class MessagesDatabaseList(val messagesDatabaseList: List<Message> = listOf()) {
-        companion object {
-            var messagesDatabaseList = listOf<Message>()
-        }
-    }
+
 
 
     // Create an AdvertiseData object to include data in the advertisement
