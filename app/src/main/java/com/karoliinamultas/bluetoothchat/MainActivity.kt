@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
+
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -99,7 +100,7 @@ class MainActivity : ComponentActivity() {
                             ChatWindow(navController = navController, mBluetoothAdapter!!, model)
                         }
                         composable(route = Screen.DrawingPad.route){
-                            DrawingPad(context, navController = navController)
+                            DrawingPad(context, navController = navController, model, mBluetoothAdapter!!)
                         }
                     }
                 }
