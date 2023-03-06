@@ -24,7 +24,7 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
 
     lateinit var currentAdvertisingSet: AdvertisingSet
     var messages = MutableLiveData<List<String>>(listOf("message"))
-    var beacons = MutableLiveData<Set<String>>(setOf("chat for debugging if no beacon"))
+    var beacons = MutableLiveData<Set<String>>(setOf("Test Chat 1","Test Chat 2"))
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
