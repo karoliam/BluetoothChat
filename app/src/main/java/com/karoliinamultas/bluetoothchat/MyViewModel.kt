@@ -1,6 +1,7 @@
 package com.karoliinamultas.bluetoothchat
 
 
+
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -41,6 +42,8 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var recievedPackages: Array<String> = arrayOf()
     var packageUUID: String = ""
     var fileInParts: Array<ByteArray> = arrayOf()
+
+
     // Create an AdvertiseData object to include data in the advertisement
 
 

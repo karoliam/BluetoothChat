@@ -5,25 +5,26 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.TopAppBar
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -97,22 +98,6 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
     )
 }
 
-    val tekstit = listOf(
-        Color(0xFF00FDDC),
-        Color(0xFFFF729F),
-        Color(0xFF04E762),
-        Color(0xFFFDE74C),
-        Color(0xFFFF4365))
-    val randomTeksti = tekstit.random()
-
-    val backgroundit = listOf(
-        Color(0xFF111D4A),
-        Color(0xFF43AA8B),
-        Color(0xFF8B635C),
-        Color(0xFF60594D),
-        Color(0xFF93A29B))
-    val randomBack = backgroundit.random()
-
     @SuppressLint("MissingPermission")
     @Composable
     fun ShowDevices(
@@ -130,7 +115,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
 //                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
         LazyColumn(
             modifier = Modifier
-                .padding(10.dp)
+
                 .fillMaxWidth()
         ) {
             items(scanResults?.size ?: 0) { index ->
@@ -146,16 +131,25 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 model.chatRoomOnJoinDatabaseChanges(scanResults?.elementAt(index).toString())
                                 navController.navigate(Screen.ChatWindow.route)
                             }
-                            .background(color = randomBack, shape = RoundedCornerShape(10.dp))
-                            .fillMaxWidth()
-                            .padding(7.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RectangleShape
+                            )
+                            .border(
+                                Dp.Hairline,
+                                MaterialTheme.colorScheme.background,
+                                RectangleShape
+                            )
+                            .fillMaxWidth(1f)
+                            .height(70.dp)
+                            .padding(24.dp)
                     ) {
                         Text(
                             text = scanResults?.elementAt(index) ?: "Unknown Device",
-                            color = randomTeksti
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.align(CenterHorizontally)
                         )
                     }
-                    Spacer(modifier = Modifier.size(10.dp))
                 }
             }
 //            itemsIndexed(scanResults.keys.toList()) { _, key ->
@@ -200,7 +194,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
 
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(
-                        text = "Scanning for devices",
+                        text = "Scanning for chats",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Light
                     )
