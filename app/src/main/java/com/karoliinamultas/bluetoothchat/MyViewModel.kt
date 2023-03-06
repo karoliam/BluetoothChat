@@ -38,7 +38,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     data class MessagesDatabaseList(val messagesDatabaseList: List<Message> = listOf()) {
         companion object {
             var messagesDatabaseList = listOf<Message>()
-            var messageDatabaseContentString = listOf<String>()
         }
     }
 
@@ -292,7 +291,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     }
     suspend fun getChatMessagesFromDatabase(chatId: String) {
         MessagesDatabaseList.messagesDatabaseList = messagesRepository.getChatMessages(chatId)
-        MessagesDatabaseList.messageDatabaseContentString = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
     }
     suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
         messagesRepository.deleteOtherChatMessages(chatId)
