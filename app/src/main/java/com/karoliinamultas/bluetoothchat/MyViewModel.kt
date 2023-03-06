@@ -10,6 +10,8 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.karoliinamultas.bluetoothchat.data.Message
+import com.karoliinamultas.bluetoothchat.data.MessagesDatabaseList
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,12 +19,13 @@ import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
 
-class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
+private const val TAG = "MyViewModelTAG"
+class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<String>>(listOf("message"))
+    var messages = MutableLiveData<List<String>>(listOf())
     var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING"))
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
@@ -220,10 +223,26 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
                 buildMessage = beaconFilter.value + "//" + uuidl + "//" + message + "//0"
                 uuids += uuidl
                 messages.postValue(messages.value?.plus(message))
+                viewModelScope.launch {
+                    saveMessageToDatabase(
+                        uuidl,
+                        message,
+                        beaconFilter.value.toString(),
+                        true
+                    )
+                }
             } else {
                 buildMessage = beaconFilter.value + "//" + uuid + "//" + message + "//0"
                 uuids += uuid
                 messages.postValue(messages.value?.plus(message))
+                viewModelScope.launch {
+                    saveMessageToDatabase(
+                        uuid,
+                        message,
+                        beaconFilter.value.toString(),
+                        false
+                    )
+                }
             }
             sendPackage = sendPackage.plus(buildMessage.toByteArray((Charsets.UTF_8)))
         } else {
@@ -321,5 +340,35 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
         const val STATE_CONNECTED = 2
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
         val UUID_APP_DATA = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
+    }
+
+    suspend fun saveMessageToDatabase(
+        messageUuid: String,
+        messageContent: String,
+        chatId: String,
+        localMessage: Boolean
+    ) {
+        messagesRepository.insertMessage(
+            Message(
+                messageUuid,
+                messageContent,
+                chatId,
+                localMessage
+            )
+        )
+    }
+
+    fun chatRoomOnJoinDatabaseChanges(chatId: String) {
+        viewModelScope.launch {
+            deleteOtherMessagesFromDatabase(chatId)
+            getChatMessagesFromDatabase(chatId)
+            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
+        }
+    }
+    suspend fun getChatMessagesFromDatabase(chatId: String) {
+        MessagesDatabaseList.messagesDatabaseList = messagesRepository.getChatMessages(chatId)
+    }
+    suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
+        messagesRepository.deleteOtherChatMessages(chatId)
     }
 }

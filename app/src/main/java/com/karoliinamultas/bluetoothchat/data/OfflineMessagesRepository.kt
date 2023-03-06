@@ -10,9 +10,11 @@ class OfflineMessagesRepository(private val messageDao: MessageDao) : MessagesRe
 
     override suspend fun deleteMessage(message: Message) = messageDao.delete(message)
 
-    override fun getChatMessages(chatId: String): Flow<List<Message>> = messageDao.getChatMessages(chatId)
+    override suspend fun getChatMessages(chatId: String): List<Message> = messageDao.getChatMessages(chatId)
 
     override suspend fun deleteAllChatMessages() = messageDao.deleteAllChatMessages()
 
     override suspend fun deleteSingleChatMessages(chatId: String) = messageDao.deleteSingleChatMessages(chatId)
+
+    override suspend fun deleteOtherChatMessages(chatId: String) = messageDao.deleteOtherChatMessages(chatId)
 }
