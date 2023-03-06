@@ -1,0 +1,20 @@
+package com.karoliinamultas.bluetoothchat.data
+
+import kotlinx.coroutines.flow.Flow
+
+interface MessagesRepository {
+
+    suspend fun insertMessage(message: Message)
+
+    suspend fun updateMessage(message: Message)
+
+    suspend fun deleteMessage(message: Message)
+
+    suspend fun getChatMessages(chatId: String): List<Message>
+
+    suspend fun deleteAllChatMessages()
+
+    suspend fun deleteSingleChatMessages(chatId: String)
+
+    suspend fun deleteOtherChatMessages(chatId: String)
+}

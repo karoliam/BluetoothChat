@@ -1,6 +1,7 @@
 package com.karoliinamultas.bluetoothchat.ui
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.decode.BitmapFactoryDecoder
+import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
 import dev.shreyaspatil.capturable.Capturable
@@ -52,7 +54,7 @@ data class PathState(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawingPad(context: Context, navController: NavController) {
+fun DrawingPad(context: Context, navController: NavController, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter) {
     val drawColor = remember { mutableStateOf(Color.Magenta) }
     val drawBrush = remember { mutableStateOf(5f) }
     val path = remember { mutableStateOf(mutableListOf<PathState>()) }
@@ -100,7 +102,7 @@ fun DrawingPad(context: Context, navController: NavController) {
             }
     ) {
         Column{
-            PaintBody(path, context, drawColor, drawBrush)
+            PaintBody(path, context, drawColor, drawBrush, model, mBluetoothAdapter )
         }
     }
 }
@@ -221,7 +223,7 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
 
 @Composable
 // Uses path of type Path state to listen to all location on the screen drawn
-fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>) {
+fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -230,7 +232,9 @@ fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, draw
             drawColor,
             drawBrush,
             path.value,
-            context
+            context,
+            model,
+            mBluetoothAdapter
         )
     }
 }
@@ -245,7 +249,9 @@ fun DrawingCanvas(
     drawColor: MutableState<Color>,
     drawBrush: MutableState<Float>,
     path: MutableList<PathState>,
-    context: Context
+    context: Context,
+    model: MyViewModel,
+    mBluetoothAdapter: BluetoothAdapter
 ) {
     val currentPath = path.last().path
     val movePath = remember { mutableStateOf<Offset?>(null) }
@@ -339,6 +345,9 @@ Column(
                         val byteArray = viewModel.bitmapToByteArray(bitmap.asAndroidBitmap())
                         Log.d("DBG", "byteArray before compress ${byteArray.size}")
                         val compressed = viewModel.compressByteArray(byteArray)
+                        model.compressedBitmap.postValue(compressed)
+                        model.chopImage(compressed, mBluetoothAdapter)
+
                         Log.d("DBG", "compress ${compressed.size}")
                         val decompressed = viewModel.decompressByteArray(compressed)
                         Log.d("DBG", "decompressed ${decompressed.size}")

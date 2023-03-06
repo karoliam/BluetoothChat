@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
+
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
@@ -65,6 +67,7 @@ class MainActivity : ComponentActivity() {
 
         model = MyViewModel(mBluetoothAdapter!!)
         setContent {
+        val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
             //Navia
             val navController = rememberNavController()
             BluetoothChatTheme() {
@@ -97,27 +100,27 @@ class MainActivity : ComponentActivity() {
                         .check()
                 }
 
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        val context = LocalContext.current
-                        NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
-                            composable(route = Screen.StartScreen.route){
-                                StartScreen(navController = navController)
-                            }
-                            composable(route = Screen.ShowChats.route) {
-                                ShowChats(navController = navController, mBluetoothAdapter!!, model)
-                            }
-                            composable(route = Screen.ChatWindow.route){
-                                ChatWindow(navController = navController, notificationManagerWrapper, mBluetoothAdapter!!, model)
-                            }
-                            composable(route = Screen.DrawingPad.route){
-                                DrawingPad(context, navController = navController)
-                            }
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val context = LocalContext.current
+                    NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
+                        composable(route = Screen.StartScreen.route){
+                            StartScreen(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.ShowChats.route) {
+                            ShowChats(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.ChatWindow.route){
+                            ChatWindow(navController = navController, mBluetoothAdapter!!, model)
+                        }
+                        composable(route = Screen.DrawingPad.route){
+                            DrawingPad(context, navController = navController, model, mBluetoothAdapter!!)
                         }
                     }
+                }
                 }
             }
 
@@ -129,6 +132,7 @@ class MainActivity : ComponentActivity() {
         startForegroundService(chatForegroundServiceIntent)
     }
 
+    }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
@@ -153,4 +157,5 @@ class MainActivity : ComponentActivity() {
 
 
 
-}
+
+
