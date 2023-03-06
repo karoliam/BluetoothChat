@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
@@ -13,6 +14,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,16 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import com.karoliinamultas.bluetoothchat.ui.DrawingPad
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
-import com.karoliinamultas.bluetoothchat.ui.chat.ChatWindow
-import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapper
-import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
-import com.karoliinamultas.bluetoothchat.ui.chat.ShowChats
+import com.karoliinamultas.bluetoothchat.ui.chat.*
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -39,11 +39,14 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
+private val REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE = 2
 private val REQUEST_IMAGE_CAPTURE = 1
+private lateinit var chatForegroundServiceIntent: Intent
 
 class MainActivity : ComponentActivity() {
     var mBluetoothAdapter: BluetoothAdapter? = null
-
+    lateinit var model: MyViewModel
+    @RequiresApi(Build.VERSION_CODES.P)
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +54,16 @@ class MainActivity : ComponentActivity() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
+        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, ask for permission
+            val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
+            requestPermissions(permission, REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE)
 
-        val model = MyViewModel(mBluetoothAdapter!!)
+        }
+
+
+        model = MyViewModel(mBluetoothAdapter!!)
         setContent {
             //Navia
             val navController = rememberNavController()
@@ -109,7 +120,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
         }
+
+    override fun onPause() {
+        super.onPause()
+        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+        startForegroundService(chatForegroundServiceIntent)
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
@@ -122,6 +141,16 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
             }
         }
+        if (requestCode == REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+                startForegroundService(chatForegroundServiceIntent)
+            }
+            } else {
+                // Permission is not granted, show a message to the user
+            }
     }
 
-    }
+
+
+}

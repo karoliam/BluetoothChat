@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
+import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 
 
@@ -172,7 +173,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     BottomSheetState(BottomSheetValue.Collapsed))
 
     // Declaring Coroutine scope
-    val coroutineScope = rememberCoroutineScope()
+        val coroutineScope = rememberCoroutineScope()
 
         BottomSheetScaffold(
             scaffoldState = bottomSheetScaffoldState,
@@ -309,6 +310,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
             }}
     }
 }
+
+
 
 @Composable
 fun ChatsList(model: MyViewModel,notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier) {

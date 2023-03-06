@@ -110,7 +110,7 @@ fun sendMessage(bluetoothLeAdvertiser:BluetoothLeAdvertiser, bluetoothLeScanner:
 //        Scan filter and options to filter for
         fun buildScanFilters(): List<ScanFilter> {
         val builder = ScanFilter.Builder()
-            builder.setServiceUuid(ParcelUuid(UUID_APP_SERVICE))
+        builder.setServiceUuid(ParcelUuid(UUID_APP_SERVICE))
 //            builder.setServiceData(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
 //            builder.setDeviceName("PAVEL")
             val filter = builder.build()
