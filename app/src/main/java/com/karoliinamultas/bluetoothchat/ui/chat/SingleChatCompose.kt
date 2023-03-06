@@ -300,10 +300,13 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 )
                             }
                         }
+                        .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
                         .background(color = MaterialTheme.colorScheme.surface)
                         .fillMaxWidth()) {
                     Row(
                         Modifier
+                            .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
+                            .height(80.dp)
                             .padding(5.dp)
                             .fillMaxWidth()
                     ) {
@@ -313,7 +316,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 text = it
                             },
                             Modifier
-                                .weight(9f)
+                                .weight(8f)
                                 .padding(10.dp, 5.dp, 5.dp, 5.dp)
                                 .focusRequester(focusRequester),
                             shape = RoundedCornerShape(5.dp),

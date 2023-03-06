@@ -23,7 +23,7 @@ class MyViewModel(messagesRepository: MessagesRepository) : ViewModel() {
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<String>>(listOf("message"))
+    var messages = MutableLiveData<List<String>>(listOf())
     var beacons = MutableLiveData<Set<String>>(setOf("Test Chat 1","Test Chat 2"))
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
