@@ -58,6 +58,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
+import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 
@@ -151,7 +152,7 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
+fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
 
     val textColors_random = listOf(
         Color(0xFF00FDDC),
@@ -186,7 +187,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: Mutable
             colors = CardDefaults.cardColors(containerColor = randomBack),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            Text(text = message, color = randomTexts, modifier = Modifier.padding(10.dp))
+            Text(text = message.message_content, color = randomTexts, modifier = Modifier.padding(10.dp))
         }
     }
 }
@@ -481,25 +482,24 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 @Composable
 fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
-    val valueList: List<String>? by model.messages.observeAsState()
+    val valueList by model.messages.collectAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
-    LaunchedEffect(valueList) {
-            if (!valueList.isNullOrEmpty()) {
+        LaunchedEffect(valueList) {
+            if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
                 notificationManagerWrapper.showNotification(
                     "tossa on kissa",
                     "kissakoira"
                 )
-                listState.scrollToItem(valueList?.lastIndex ?: 0)
+                listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
+
             }
         }
-        LazyColumn(state = listState,modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)) {
-            items(valueList?.size ?: 0) { index ->
+        LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            items(valueList.messagesDatabaseList?.size ?: 0) { index ->
                 ShowChat(
-                    valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa",
+                    valueList.messagesDatabaseList?.get(index) ?: Message("","viesti tuli perille ilman dataa","",false),
                     colorsOnOff = colorsOnOff
                 )
             }

@@ -18,11 +18,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karoliinamultas.bluetoothchat.data.Message
-import com.karoliinamultas.bluetoothchat.data.MessagesDatabaseList
+import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
@@ -33,10 +37,18 @@ private const val TAG = "MyViewModelTAG"
 class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<String>>(listOf())
+
     var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING 1", "DEBUGGING 2"))
     var beaconFilter = MutableLiveData<String>("")
+    val messages: StateFlow<MessagesListUiState> =
+        messagesRepository.getChatMessages().map { MessagesListUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000L),
+                initialValue = MessagesListUiState()
+            )
     var uuids: List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
@@ -74,10 +86,15 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                     "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
                 )
 
+            /** maybe */
+            val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
+
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
                 if (splitMessage[2] == "0") {
-                    messages.postValue(messages.value?.plus(splitMessage[3]))
+
+//                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
+//                    messages.postValue(messages.value?.plus(splitMessage[3]))
                     uuids += splitMessage[1]
                     Log.d(
                         "hei",
@@ -268,7 +285,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 val uuidl = UUID.randomUUID().toString()
                 buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/0/*/" + message
                 uuids += uuidl
-                messages.postValue(messages.value?.plus(message))
+                /** maybe */
+//                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
+//                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
                         uuidl,
@@ -280,7 +299,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             } else {
                 buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/0/*/" + message
                 uuids += uuid
-                messages.postValue(messages.value?.plus(message))
+                /** maybe */
+//                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
+//                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
                         uuid,
@@ -412,13 +433,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     fun chatRoomOnJoinDatabaseChanges(chatId: String) {
         viewModelScope.launch {
             deleteOtherMessagesFromDatabase(chatId)
-            getChatMessagesFromDatabase(chatId)
-            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
         }
-    }
-
-    suspend fun getChatMessagesFromDatabase(chatId: String) {
-        MessagesDatabaseList.messagesDatabaseList = messagesRepository.getChatMessages(chatId)
     }
 
     suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
