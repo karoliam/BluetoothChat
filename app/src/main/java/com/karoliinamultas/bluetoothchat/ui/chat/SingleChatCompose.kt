@@ -3,14 +3,18 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 import android.bluetooth.BluetoothAdapter
 import android.widget.Toast
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.material3.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -26,9 +30,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +43,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -63,12 +71,21 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surface)
+
     // Create a boolean variable
     // to store the display menu state
     var mDisplayMenu by remember { mutableStateOf(false) }
 
+    // Colors on off
+    var colorsOnOff = remember { mutableStateOf(false) }
+
+
     // fetching local context
     val mContext = LocalContext.current
+
+    //Joined chatname
+    val chatName = model.beaconFilter.observeAsState()
+
     //Topbar
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -79,8 +96,8 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
-                        "Restroom Chat",
-                        Modifier.padding(40.dp, 0.dp),
+                        chatName.value ?: "Unknown Chat",
+                        modifier = Modifier.padding(80.dp, 0.dp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 20.sp,
@@ -96,21 +113,34 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* doSomething() */ }) {
+                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
                             contentDescription = "Menu button"
                         )
                     }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = mDisplayMenu,
+                        onDismissRequest = { mDisplayMenu = false }
+                    ) {
+                        // Creating dropdown menu item, on click
+                        // would create a Toast message
+                        DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
+                            Text(text = "Settings")
+                        }
+                        DropdownMenuItem(onClick = { colorsOnOff.value = !colorsOnOff.value }){
+                            Text(text = "Chat colors off")
+                        }
+                    }
                 },
             )
         },
-        content = { innerPadding ->
+        content = { innerPadding->
             Column(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model)
+                Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model, colorsOnOff)
             }
         }
     )
@@ -119,7 +149,7 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowChat(message:String, modifier: Modifier = Modifier) {
+fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
 
     val textColors_random = listOf(
         Color(0xFF00FDDC),
@@ -127,26 +157,28 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
         Color(0xFF04E762),
         Color(0xFFFDE74C),
         Color(0xFFFF4365))
-    val randomTexts = textColors_random.random()
+
+    val randomTexts = if(colorsOnOff.value) MaterialTheme.colorScheme.background else textColors_random.random()
+
 
     val backgroundColors_random = listOf(
         Color(0xFF111D4A),
         Color(0xFF43AA8B),
-        Color(0xFFE490C7),
-        Color(0xFFBEA06B),
-        Color(0xFFFF8963)
-    )
-    val randomBack = backgroundit.random()
+        Color(0xFF8B635C),
+        Color(0xFF60594D),
+        Color(0xFF93A29B))
+
+    val randomBack = if(colorsOnOff.value) MaterialTheme.colorScheme.onBackground else backgroundColors_random.random()
 
     Row(
         modifier = Modifier
-            .padding(5.dp)
+            .padding(2.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
         Card(
             modifier = Modifier
-                .width(150.dp)
+                .width(200.dp)
                 .padding(5.dp),
 
             colors = CardDefaults.cardColors(containerColor = randomBack),
@@ -159,7 +191,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: NotificationManagerWrapper, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
+fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: NotificationManagerWrapper, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel, colorsOnOff: MutableState<Boolean>) {
 
 
     val inputvalue = remember { mutableStateOf(TextFieldValue()) }
@@ -169,8 +201,8 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
 
         Surface(modifier = Modifier
             .padding(all = Dp(0f))
-            .fillMaxHeight(fraction = 0.89f)) {
-            ChatsList(model, notificationManagerWrapper)
+            .fillMaxHeight(0.89f)){
+            ChatsList(model, colorsOnOff = colorsOnOff)
         }
         InputField( modifier, navController, mBluetoothAdapter, model)
     }
@@ -179,7 +211,6 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
-    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     var text by rememberSaveable { mutableStateOf("") }
     //BotMenu
@@ -191,7 +222,10 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     // Declaring Coroutine scope
         val coroutineScope = rememberCoroutineScope()
 
-        BottomSheetScaffold(
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    BottomSheetScaffold(
             scaffoldState = bottomSheetScaffoldState,
             sheetContent =  {
                 Box(
@@ -269,10 +303,13 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 )
                             }
                         }
+                        .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
                         .background(color = MaterialTheme.colorScheme.surface)
                         .fillMaxWidth()) {
                     Row(
                         Modifier
+                            .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
+                            .height(80.dp)
                             .padding(5.dp)
                             .fillMaxWidth()
                     ) {
@@ -282,38 +319,47 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 text = it
                             },
                             Modifier
-                                .weight(9f)
-                                .padding(5.dp),
+                                .weight(8f)
+                                .padding(10.dp, 5.dp, 5.dp, 5.dp)
+                                .focusRequester(focusRequester),
                             shape = RoundedCornerShape(5.dp),
                             placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
                             trailingIcon = {
-                                IconButton(
-                                    onClick = { coroutineScope.launch {
-                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
-                                            bottomSheetScaffoldState.bottomSheetState.expand()
-                                        }else{
-                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                Row() {
+                                    androidx.compose.material3.Divider(
+                                        color = MaterialTheme.colorScheme.background.copy(0.2f),
+                                        modifier = Modifier
+                                            .padding(0.dp, 8.dp, 0.dp, 0.dp)
+                                            .fillMaxHeight(0.8f)  //fill the max height
+                                            .width(1.dp)
+                                    )
+                                    IconButton(
+                                        onClick = { coroutineScope.launch {
+                                            if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
+                                                bottomSheetScaffoldState.bottomSheetState.expand()
+                                            }else{
+                                                bottomSheetScaffoldState.bottomSheetState.collapse()
+                                            }
+                                        } },
+                                        modifier = Modifier
+                                            .height(60.dp)
+                                            .width(60.dp),
+                                        colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
+                                        content = {
+                                            Icon(
+                                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                                contentDescription = "Localized description"
+                                            )
                                         }
-                                    } },
-                                    modifier = Modifier
-                                        .height(60.dp)
-                                        .width(60.dp)
-                                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
-                                    content = {
-                                        Icon(
-                                            imageVector = Icons.Filled.KeyboardArrowUp,
-                                            contentDescription = "Localized description"
-                                        )
-                                    }
-                                )
+                                    )
+                                }
+
                             },
                             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                             keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.None,
-                                autoCorrect = true,
+                                capitalization = KeyboardCapitalization.Sentences,
                                 keyboardType = KeyboardType.Text,
-                                imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                                imeAction = ImeAction.Done,
                             ),
                             textStyle = TextStyle(
                                 color = Color(0xFF242124),
@@ -344,10 +390,13 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         .height(60.dp)
                         .width(60.dp)
                         .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                     content = {
                         Icon(
                             imageVector = Icons.Filled.Send,
+                            modifier = Modifier
+                                .height(28.dp)
+                                .width(28.dp),
                             contentDescription = "Localized description"
                         )
                     }
@@ -364,18 +413,29 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 
 @Composable
-fun ChatsList(model: MyViewModel,notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier) {
+fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
     val valueList: List<String>? by model.messages.observeAsState()
+    val listState = rememberLazyListState()
+    LazyColumn(state = listState, modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
     LaunchedEffect(valueList) {
         if (!valueList.isNullOrEmpty()) {
             // Value list has changed, show a notification
             notificationManagerWrapper.showNotification("New message received", "You have a new message")
+            listState.scrollToItem(valueList?.lastIndex ?: 0)
+
         }
     }
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         items(valueList?.size ?: 0) { index ->
-            ShowChat(valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa")
+            ShowChat(valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa", colorsOnOff = colorsOnOff)
         }
     }
+//    if(valueList!!.size > 0){
+//    LaunchedEffect(valueList?.size) {
+//        listState.scrollToItem(valueList?.lastIndex ?: 0)
+//    }
+//    }
 }

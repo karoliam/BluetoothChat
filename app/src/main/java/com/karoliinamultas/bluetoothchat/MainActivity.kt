@@ -21,8 +21,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -70,6 +72,7 @@ class MainActivity : ComponentActivity() {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
             //Navia
             val navController = rememberNavController()
+
             BluetoothChatTheme() {
                 val result = remember { mutableStateOf<Int?>(100) }
                 val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
