@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -97,7 +98,7 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                 title = {
                     Text(
                         chatName.value ?: "Unknown Chat",
-                        modifier = Modifier.padding(80.dp, 0.dp),
+                        modifier = Modifier.padding(30.dp, 0.dp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 20.sp,
@@ -129,7 +130,8 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                             Text(text = "Settings")
                         }
                         DropdownMenuItem(onClick = { colorsOnOff.value = !colorsOnOff.value }){
-                            Text(text = "Chat colors off")
+                            val chatColorText = if(colorsOnOff.value) "Colorful mode" else "Colorblind mode"
+                            Text(text = chatColorText)
                         }
                     }
                 },
@@ -201,7 +203,7 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
 
         Surface(modifier = Modifier
             .padding(all = Dp(0f))
-            .fillMaxHeight(0.89f)){
+            .fillMaxHeight(0.88f)){
             ChatsList(model, colorsOnOff = colorsOnOff, notificationManagerWrapper = notificationManagerWrapper)
         }
         InputField( modifier, navController, mBluetoothAdapter, model)
@@ -224,6 +226,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+
+    val isVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     BottomSheetScaffold(
             scaffoldState = bottomSheetScaffoldState,
@@ -285,7 +289,69 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
             },
             sheetPeekHeight = 0.dp
         ){
-                Box(
+//        TextField(
+//            value = text,
+//            onValueChange = {text = it},
+//            modifier = Modifier
+//                .requiredHeightIn(80.dp, 80.dp)
+//                .fillMaxWidth(0.8f)
+//                .fillMaxHeight(0.8f)
+//                .focusRequester(focusRequester),
+//            placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
+//            shape = RoundedCornerShape(100.dp),
+//            trailingIcon = {
+//                Row() {
+//                    androidx.compose.material.Divider(
+//                        color = Color(0xFF242124).copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
+//                        modifier = Modifier
+//                            .padding(0.dp, 8.dp, 0.dp, 0.dp)
+//                            .fillMaxHeight(0.6f)  //fill the max height
+//                            .width(1.dp)
+//                    )
+//                    IconButton(
+//                        onClick = { coroutineScope.launch {
+//                            if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
+//                                bottomSheetScaffoldState.bottomSheetState.expand()
+//                            }else{
+//                                bottomSheetScaffoldState.bottomSheetState.collapse()
+//                            }
+//                        } },
+//                        modifier = Modifier
+//                            .height(60.dp)
+//                            .width(60.dp),
+//                        colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
+//                        content = {
+//                            Icon(
+//                                imageVector = Icons.Filled.KeyboardArrowUp,
+//                                contentDescription = "Localized description"
+//                            )
+//                        }
+//                    )
+//                }
+//
+//            },
+//            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+//            keyboardOptions = KeyboardOptions(
+//                capitalization = KeyboardCapitalization.Sentences,
+//                keyboardType = KeyboardType.Text,
+//                imeAction = ImeAction.Done,
+//            ),
+//            textStyle = TextStyle(
+//                color = Color(0xFF242124),
+//                fontSize = TextUnit.Unspecified,
+//                fontFamily = FontFamily.SansSerif
+//            ),
+//            maxLines = 1,
+//            singleLine = true,
+//            colors = TextFieldDefaults.textFieldColors(
+//                containerColor = Color(0xFFF5FEFD),
+//                textColor = Color(0xFF242124),
+//                disabledTextColor = Color.Transparent,
+//                focusedIndicatorColor = Color.Transparent,
+//                unfocusedIndicatorColor = Color.Transparent,
+//                disabledIndicatorColor = Color.Transparent)
+//            )
+            Box(
                     Modifier
                         .drawWithCache {
                             val offsetY = (-5).dp.toPx()
@@ -304,11 +370,12 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                             }
                         }
                         .background(color = MaterialTheme.colorScheme.surface)
-                        .fillMaxWidth()) {
+                        .fillMaxWidth()
+                        .fillMaxHeight(1f)
+                        ) {
                     Row(
                         Modifier
-                            .requiredSizeIn(400.dp, 80.dp, 400.dp, 150.dp)
-                            .height(80.dp)
+                            .requiredHeightIn(80.dp, 80.dp)
                             .padding(5.dp)
                             .fillMaxWidth()
                     ) {
@@ -405,7 +472,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 
 
-            }}
+            }
+            }
     }
 }
 
@@ -426,7 +494,9 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
                 listState.scrollToItem(valueList?.lastIndex ?: 0)
             }
         }
-        LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        LazyColumn(state = listState,modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)) {
             items(valueList?.size ?: 0) { index ->
                 ShowChat(
                     valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa",
