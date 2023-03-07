@@ -29,10 +29,10 @@ class NotificationManagerWrapperImpl(private val context: Context) : Notificatio
             .setSmallIcon(R.drawable.highlighter_size_4_40px)
             .setAutoCancel(true)
             .setPriority(Notification.PRIORITY_DEFAULT)
+        notificationManager.notify(MESSAGE_NOTIFICATION_ID, builder.build())
 
         return builder.build()
 
-//        notificationManager.notify(MESSAGE_NOTIFICATION_ID, builder.build())
 
     }
 }

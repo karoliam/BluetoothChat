@@ -2,37 +2,22 @@ package com.karoliinamultas.bluetoothchat.service
 
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.os.ParcelUuid
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationCompat
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
-import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
-import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapper
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
-import com.karoliinamultas.bluetoothchat.ui.chat.ShowChat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.notify
 import java.nio.charset.Charset
 import java.util.*
 
@@ -44,41 +29,32 @@ class ChatForegroundService() : Service() {
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
 
     }
+    private lateinit var context: Context
+
+    override fun onCreate() {
+        super.onCreate()
+        context = applicationContext
+    }
     private lateinit var currentAdvertisingSet: AdvertisingSet
     private val messages = MutableLiveData<List<String>>(listOf("message"))
     private var uuids = listOf<String>()
-    private val mResults = hashMapOf<String, ScanResult>()
     private val fScanning = MutableLiveData(false)
-    private val scanResults = MutableLiveData<List<ScanResult>>(null)
-    private val dataToSend = MutableLiveData<ByteArray>("".toByteArray())
     private lateinit var bluetoothManager: BluetoothManager
     private lateinit var mBluetoothAdapter: BluetoothAdapter
-
-
+    private lateinit var contextState: MutableState<Context>
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//
-//        val channel = NotificationChannel(
-//            CHANNEL_ID,
-//            "My Channel",
-//            NotificationManager.IMPORTANCE_DEFAULT
-//        )
-//        notificationManager.createNotificationChannel(channel)
-//
-//        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-//            .setContentTitle("New message received")
-//            .setContentText("You have a new message")
-//            .setSmallIcon(R.drawable.highlighter_size_4_40px)
-//            .setAutoCancel(true)
-//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//
-//        notificationManager.notify(MESSAGE_NOTIFICATION_ID.toInt(), builder.build())
-        val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
-        val notif = notificationManagerWrapper.showNotification(title = "New message", "You received a new dog")
-        startForeground(MESSAGE_NOTIFICATION_ID, notif)
+
+        val notification = Notification.Builder(this, CHANNEL_ID)
+            .setContentTitle("Foreground Service")
+            .setContentText("Running")
+            .setSmallIcon(R.drawable.highlighter_size_4_40px)
+            .build()
+
+        startForeground(MESSAGE_NOTIFICATION_ID, notification)
         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
         scanDevices(mBluetoothAdapter.bluetoothLeScanner)
+
         return START_STICKY
     }
     override fun onBind(intent: Intent): IBinder? {
@@ -91,13 +67,17 @@ class ChatForegroundService() : Service() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             val serviceData = result.scanRecord?.getServiceData(ParcelUuid(UUID_APP_SERVICE))
-            val splitMessage = String(serviceData ?: "".toByteArray(Charsets.UTF_8), Charset.defaultCharset()).split("//")
+            val splitMessage = String(serviceData ?: "".toByteArray(Charsets.UTF_8), Charset.defaultCharset()).split("/*/")
             if (!uuids.contains(splitMessage[0])) {
                 messages.postValue(messages.value?.plus(splitMessage[1]))
                 uuids += splitMessage[0]
                 Log.d("DBG", "message ${splitMessage[1]}")
-
-
+                val notificationManagerWrapper = NotificationManagerWrapperImpl(context)
+                val notif = notificationManagerWrapper.showNotification(
+                    "New message",
+                    "You have received a new message!"
+                )
+                startForeground(MESSAGE_NOTIFICATION_ID, notif)
             }
         }
     }

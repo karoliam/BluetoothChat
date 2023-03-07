@@ -484,15 +484,14 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
     val valueList: List<String>? by model.messages.observeAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
-        LaunchedEffect(valueList) {
+    LaunchedEffect(valueList) {
             if (!valueList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
                 notificationManagerWrapper.showNotification(
-                    "New message received",
-                    "You have a new message"
+                    "tossa on kissa",
+                    "kissakoira"
                 )
                 listState.scrollToItem(valueList?.lastIndex ?: 0)
-
             }
         }
         LazyColumn(state = listState,modifier = Modifier
