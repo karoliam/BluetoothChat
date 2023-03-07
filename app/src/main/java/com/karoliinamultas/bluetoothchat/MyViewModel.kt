@@ -65,7 +65,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             val serviceData = result.scanRecord?.getServiceData(ParcelUuid(UUID_APP_SERVICE))
-            val splitMessage = String(
+                val splitMessage = String(
                 serviceData ?: "".toByteArray(),
                 Charset.defaultCharset()
             ).split("/*/")

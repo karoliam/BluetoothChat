@@ -133,6 +133,12 @@ class MainActivity : ComponentActivity() {
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
         startForegroundService(chatForegroundServiceIntent)
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+        stopService(chatForegroundServiceIntent)
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {

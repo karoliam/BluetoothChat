@@ -1,12 +1,14 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
+import com.karoliinamultas.bluetoothchat.MainActivity
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService.Companion.MESSAGE_NOTIFICATION_ID
 
@@ -23,14 +25,25 @@ class NotificationManagerWrapperImpl(private val context: Context) : Notificatio
             NotificationChannel(channelId, "My Channel", NotificationManager.IMPORTANCE_DEFAULT)
         notificationManager.createNotificationChannel(channel)
 
+        val resultIntent = Intent(context, MainActivity::class.java)
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
+            // Add the intent, which inflates the back stack
+            addNextIntentWithParentStack(resultIntent)
+            // Get the PendingIntent containing the entire back stack
+            getPendingIntent(0,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
         val builder = Notification.Builder(context, channelId)
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(R.drawable.highlighter_size_4_40px)
             .setAutoCancel(true)
             .setPriority(Notification.PRIORITY_DEFAULT)
-        notificationManager.notify(MESSAGE_NOTIFICATION_ID, builder.build())
+            .setContentIntent(resultPendingIntent)
 
+        notificationManager.notify(MESSAGE_NOTIFICATION_ID, builder.build())
         return builder.build()
 
 

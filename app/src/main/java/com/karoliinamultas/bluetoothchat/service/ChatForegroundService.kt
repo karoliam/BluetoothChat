@@ -13,6 +13,12 @@ import android.os.ParcelUuid
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.karoliinamultas.bluetoothchat.AppViewModelProvider
+import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +47,7 @@ class ChatForegroundService() : Service() {
     private val fScanning = MutableLiveData(false)
     private lateinit var bluetoothManager: BluetoothManager
     private lateinit var mBluetoothAdapter: BluetoothAdapter
-    private lateinit var contextState: MutableState<Context>
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         val notification = Notification.Builder(this, CHANNEL_ID)
@@ -72,6 +78,8 @@ class ChatForegroundService() : Service() {
                 messages.postValue(messages.value?.plus(splitMessage[1]))
                 uuids += splitMessage[0]
                 Log.d("DBG", "message ${splitMessage[1]}")
+
+
                 val notificationManagerWrapper = NotificationManagerWrapperImpl(context)
                 val notif = notificationManagerWrapper.showNotification(
                     "New message",
