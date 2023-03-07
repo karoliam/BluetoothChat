@@ -26,7 +26,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<String>>(listOf())
+    var messages = MutableLiveData<List<Message>>(listOf())
     var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING 1", "DEBUGGING 2"))
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
@@ -65,11 +65,16 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 Charset.defaultCharset()
             ).split("//")
 
+            /** maybe */
+            val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
+
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0])) {
 
                 Log.d("message content", splitMessage.size.toString())
                 if (splitMessage[3] == "0") {
-                    messages.postValue(messages.value?.plus(splitMessage[2]))
+
+                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
+//                    messages.postValue(messages.value?.plus(splitMessage[2]))
                     uuids += splitMessage[1]
                     Log.d(
                         "hei",
@@ -226,7 +231,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 val uuidl = UUID.randomUUID().toString()
                 buildMessage = beaconFilter.value + "//" + uuidl + "//" + message + "//0"
                 uuids += uuidl
-                messages.postValue(messages.value?.plus(message))
+                /** maybe */
+                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
+//                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
                         uuidl,
@@ -238,7 +245,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             } else {
                 buildMessage = beaconFilter.value + "//" + uuid + "//" + message + "//0"
                 uuids += uuid
-                messages.postValue(messages.value?.plus(message))
+                /** maybe */
+                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
+//                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
                         uuid,
@@ -366,7 +375,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         viewModelScope.launch {
             deleteOtherMessagesFromDatabase(chatId)
             getChatMessagesFromDatabase(chatId)
-            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it.message_content }
+            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it }
         }
     }
     suspend fun getChatMessagesFromDatabase(chatId: String) {

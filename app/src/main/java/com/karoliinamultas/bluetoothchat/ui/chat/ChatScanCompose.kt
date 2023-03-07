@@ -126,7 +126,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 model.beaconFilter.postValue(scanResults?.elementAt(index))
                                 model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
                                 model.stopScanBeacons(mBluetoothAdapter.bluetoothLeScanner)
-                                model.messages.postValue(listOf(""))
+                                model.messages.postValue(listOf())
                                 // delete other chat histories
                                 model.chatRoomOnJoinDatabaseChanges(scanResults?.elementAt(index).toString())
                                 navController.navigate(Screen.ChatWindow.route)
