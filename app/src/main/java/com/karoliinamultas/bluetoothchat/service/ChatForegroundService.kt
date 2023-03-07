@@ -91,7 +91,7 @@ class ChatForegroundService() : Service() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             val serviceData = result.scanRecord?.getServiceData(ParcelUuid(UUID_APP_SERVICE))
-            val splitMessage = String(serviceData ?: "".toByteArray(Charsets.UTF_8), Charset.defaultCharset()).split("//")
+            val splitMessage = String(serviceData ?: "".toByteArray(Charsets.UTF_8), Charset.defaultCharset()).split("/*/")
             if (!uuids.contains(splitMessage[0])) {
                 messages.postValue(messages.value?.plus(splitMessage[1]))
                 uuids += splitMessage[0]
