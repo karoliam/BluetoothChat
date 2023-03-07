@@ -16,7 +16,7 @@ object AppViewModelProvider {
 
         initializer {
             MyViewModel(
-                bluetoothChatApplication().container.messagesRepository, application = bluetoothChatApplication()
+                bluetoothChatApplication().container.messagesRepository
             )
         }
     }

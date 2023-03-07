@@ -95,13 +95,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         )
 
                     }
-                    //notificaatiot
-                    var notificationManager = NotificationManagerWrapperImpl(getApplication<Application>().applicationContext
-                    )
-                    notificationManager.showNotification(
-                        "New message received",
-                        "kissakoirakissakoira"
-                    )
 
                 } else {
                     Log.d(
@@ -125,7 +118,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 //                        glueFileTogether(fileInParts)
 //                    }
                     Log.d("package", "byteArray ${splitMessage[2]} the thing ${splitMessage[3]}")
-                    val packageSize = splitMessage[3].split("/")
                     fRecieving.postValue(true)
                     if (fileInParts.size == 0) {
                         packageUUID = splitMessage[1]

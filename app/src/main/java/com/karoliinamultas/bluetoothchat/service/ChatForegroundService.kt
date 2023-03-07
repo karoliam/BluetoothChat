@@ -74,8 +74,8 @@ class ChatForegroundService() : Service() {
                 Log.d("DBG", "message ${splitMessage[1]}")
                 val notificationManagerWrapper = NotificationManagerWrapperImpl(context)
                 val notif = notificationManagerWrapper.showNotification(
-                    "tossa on kissa",
-                    "kissakoira"
+                    "New message",
+                    "You have received a new message!"
                 )
                 startForeground(MESSAGE_NOTIFICATION_ID, notif)
             }
