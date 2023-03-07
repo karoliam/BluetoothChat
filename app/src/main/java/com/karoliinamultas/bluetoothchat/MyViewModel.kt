@@ -2,17 +2,25 @@ package com.karoliinamultas.bluetoothchat
 
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
+import android.content.Context
+import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessagesDatabaseList
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
+import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -25,7 +33,6 @@ private const val TAG = "MyViewModelTAG"
 class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
     lateinit var currentAdvertisingSet: AdvertisingSet
     var messages = MutableLiveData<List<String>>(listOf())
     var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING 1", "DEBUGGING 2"))
@@ -37,16 +44,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
     var compressedBitmap = MutableLiveData<ByteArray>()
-
     // file recieving and sending stuff
     var fRecieving = MutableLiveData<Boolean>(false)
     var recievedPackages: Array<String> = arrayOf()
     var packageUUID: String = ""
     var fileInParts: Array<ByteArray> = arrayOf()
 
-
     // Create an AdvertiseData object to include data in the advertisement
-
 
     val parameters = AdvertisingSetParameters.Builder()
         .setLegacyMode(false)
@@ -91,7 +95,14 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         )
 
                     }
-                    // notifikaatio ehk
+                    //notificaatiot
+                    var notificationManager = NotificationManagerWrapperImpl(getApplication<Application>().applicationContext
+                    )
+                    notificationManager.showNotification(
+                        "New message received",
+                        "kissakoirakissakoira"
+                    )
+
                 } else {
                     Log.d(
                         "files",
@@ -113,10 +124,32 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 //                        Log.d("file length", fileInParts[0].size.toString())
 //                        glueFileTogether(fileInParts)
 //                    }
+                    Log.d("package", "byteArray ${splitMessage[2]} the thing ${splitMessage[3]}")
+                    val packageSize = splitMessage[3].split("/")
+                    fRecieving.postValue(true)
+                    if (fileInParts.size == 0) {
+                        packageUUID = splitMessage[1]
+                        fileInParts =
+                            Array<ByteArray>(Integer.parseInt(packageSize[1]!!)) { i -> "".toByteArray() }
+                    }
+                    if (splitMessage[1] == packageUUID) {
+                        fileInParts[Integer.parseInt(packageSize[0]) - 1] =
+                            splitMessage[2].toByteArray(Charsets.UTF_8)
+                    }
+
+
+                    if (packageSize?.get(0)!! == packageSize?.get(1)!!) {
+                        fRecieving.postValue(false)
+                        Log.d("file length", fileInParts.size.toString())
+                        Log.d("stop", packageSize?.get(0).toString())
+                    }
                 }
             }
+            }
+
         }
-    }
+
+
     private val leScanCallbackBeacons: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
@@ -284,7 +317,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
 
         viewModelScope.launch(Dispatchers.IO) {
-            stopScan(bluetoothLeScanner)
+                stopScan(bluetoothLeScanner)
             sendPackage.forEach {
                 delay(MESSAGE_PERIOD / 2)
                 val data = AdvertiseData.Builder()
