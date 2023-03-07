@@ -2,11 +2,9 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import android.bluetooth.BluetoothAdapter
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.material3.*
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,10 +12,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,19 +26,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -58,7 +54,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
-import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 
 
@@ -93,7 +88,7 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
         contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             TopAppBar(
-                elevation = 5.dp,
+                elevation = 8.dp,
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
@@ -184,7 +179,7 @@ fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: Mutable
                 .padding(5.dp),
 
             colors = CardDefaults.cardColors(containerColor = randomBack),
-            elevation = CardDefaults.cardElevation(8.dp)
+            elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Text(text = message, color = randomTexts, modifier = Modifier.padding(10.dp))
         }
@@ -203,14 +198,16 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
 
         Surface(modifier = Modifier
             .padding(all = Dp(0f))
-            .fillMaxHeight(0.88f)){
+            .fillMaxHeight(0.89f)){
             ChatsList(model, colorsOnOff = colorsOnOff, notificationManagerWrapper = notificationManagerWrapper)
         }
         InputField( modifier, navController, mBluetoothAdapter, model)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
     val context = LocalContext.current
@@ -222,7 +219,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     BottomSheetState(BottomSheetValue.Collapsed))
 
     // Declaring Coroutine scope
-        val coroutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -289,89 +286,13 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
             },
             sheetPeekHeight = 0.dp
         ){
-//        TextField(
-//            value = text,
-//            onValueChange = {text = it},
-//            modifier = Modifier
-//                .requiredHeightIn(80.dp, 80.dp)
-//                .fillMaxWidth(0.8f)
-//                .fillMaxHeight(0.8f)
-//                .focusRequester(focusRequester),
-//            placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
-//            shape = RoundedCornerShape(100.dp),
-//            trailingIcon = {
-//                Row() {
-//                    androidx.compose.material.Divider(
-//                        color = Color(0xFF242124).copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
-//                        modifier = Modifier
-//                            .padding(0.dp, 8.dp, 0.dp, 0.dp)
-//                            .fillMaxHeight(0.6f)  //fill the max height
-//                            .width(1.dp)
-//                    )
-//                    IconButton(
-//                        onClick = { coroutineScope.launch {
-//                            if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
-//                                bottomSheetScaffoldState.bottomSheetState.expand()
-//                            }else{
-//                                bottomSheetScaffoldState.bottomSheetState.collapse()
-//                            }
-//                        } },
-//                        modifier = Modifier
-//                            .height(60.dp)
-//                            .width(60.dp),
-//                        colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
-//                        content = {
-//                            Icon(
-//                                imageVector = Icons.Filled.KeyboardArrowUp,
-//                                contentDescription = "Localized description"
-//                            )
-//                        }
-//                    )
-//                }
-//
-//            },
-//            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-//            keyboardOptions = KeyboardOptions(
-//                capitalization = KeyboardCapitalization.Sentences,
-//                keyboardType = KeyboardType.Text,
-//                imeAction = ImeAction.Done,
-//            ),
-//            textStyle = TextStyle(
-//                color = Color(0xFF242124),
-//                fontSize = TextUnit.Unspecified,
-//                fontFamily = FontFamily.SansSerif
-//            ),
-//            maxLines = 1,
-//            singleLine = true,
-//            colors = TextFieldDefaults.textFieldColors(
-//                containerColor = Color(0xFFF5FEFD),
-//                textColor = Color(0xFF242124),
-//                disabledTextColor = Color.Transparent,
-//                focusedIndicatorColor = Color.Transparent,
-//                unfocusedIndicatorColor = Color.Transparent,
-//                disabledIndicatorColor = Color.Transparent)
-//            )
+
             Box(
-                    Modifier
-                        .drawWithCache {
-                            val offsetY = (-5).dp.toPx()
-                            val shadowColor = Color.Black
-                            val shadowAlpha = 0.3f
-                            val shadowBlur = 6.dp.toPx()
-                            onDrawWithContent {
-                                drawContent()
-                                drawRect(
-                                    shadowColor.copy(alpha = shadowAlpha),
-                                    Offset(0f, offsetY),
-                                    size = Size(size.width, shadowBlur),
-                                    alpha = shadowAlpha,
-                                    style = Fill
-                                )
-                            }
-                        }
-                        .background(color = MaterialTheme.colorScheme.surface)
-                        .fillMaxWidth()
-                        .fillMaxHeight(1f)
+                Modifier
+                    .background(color = MaterialTheme.colorScheme.background)
+                    .fillMaxWidth()
+                    .fillMaxHeight(1f)
+                    .padding(6.dp, 1.dp, 10.dp, 10.dp)
                         ) {
                     Row(
                         Modifier
@@ -385,22 +306,22 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 text = it
                             },
                             Modifier
-                                .weight(8f)
-                                .padding(10.dp, 5.dp, 5.dp, 5.dp)
+                                .weight(9f)
+                                .padding(6.dp, 8.dp, 8.dp, 8.dp)
                                 .focusRequester(focusRequester),
-                            shape = RoundedCornerShape(5.dp),
-                            placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
+                            shape = RoundedCornerShape(50.dp),
+                            placeholder = { Text(text = "Message", color = MaterialTheme.colorScheme.background.copy(0.5f)) },
                             trailingIcon = {
                                 Row() {
                                     androidx.compose.material.Divider(
-                                        color = Color(0xFF242124).copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
+                                        color = MaterialTheme.colorScheme.background.copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
                                         modifier = Modifier
-                                            .padding(0.dp, 8.dp, 0.dp, 0.dp)
+                                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
                                             .fillMaxHeight(0.8f)  //fill the max height
                                             .width(1.dp)
                                     )
                                     IconButton(
-                                        onClick = { coroutineScope.launch {
+                                        onClick = { Log.d("Hitoo", isVisible.toString()) ; coroutineScope.launch {
                                             if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
                                                 bottomSheetScaffoldState.bottomSheetState.expand()
                                             }else{
@@ -410,7 +331,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                         modifier = Modifier
                                             .height(60.dp)
                                             .width(60.dp),
-                                        colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFF242124)),
+                                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
                                         content = {
                                             Icon(
                                                 imageVector = Icons.Filled.KeyboardArrowUp,
@@ -428,15 +349,15 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 imeAction = ImeAction.Done,
                             ),
                             textStyle = TextStyle(
-                                color = Color(0xFF242124),
+                                color = MaterialTheme.colorScheme.background,
                                 fontSize = TextUnit.Unspecified,
                                 fontFamily = FontFamily.SansSerif
                             ),
-                            maxLines = 1,
-                            singleLine = true,
+                            maxLines = 20,
+                            singleLine = false,
                             colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color(0xFFF5FEFD),
-                                textColor = Color(0xFF242124),
+                                containerColor = MaterialTheme.colorScheme.onBackground,
+                                textColor = MaterialTheme.colorScheme.background,
                                 disabledTextColor = Color.Transparent,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -453,14 +374,17 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         }
                               },
                     modifier = Modifier
-                        .height(60.dp)
-                        .width(60.dp)
-                        .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                        .height(50.dp)
+                        .width(50.dp)
+                        .padding(0.dp, 0.dp, 0.dp, 0.dp)
+                        .align(CenterVertically)
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(100.dp)),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
                     content = {
                         Icon(
                             imageVector = Icons.Filled.Send,
                             modifier = Modifier
+                                .padding(3.dp, 0.dp, 0.dp, 0.dp)
                                 .height(28.dp)
                                 .width(28.dp),
                             contentDescription = "Localized description"
