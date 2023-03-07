@@ -419,7 +419,9 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, modifier: Modif
             ShowChat(valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa", colorsOnOff = colorsOnOff)
         }
     }
+    if(valueList!!.size > 0){
     LaunchedEffect(valueList?.size) {
-        listState.scrollToItem(valueList!!.lastIndex)
+        listState.scrollToItem(valueList?.lastIndex ?: 0)
+    }
     }
 }
