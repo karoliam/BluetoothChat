@@ -414,24 +414,24 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 @Composable
 fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
-    val valueList: List<Message>? by model.messages.observeAsState()
+    val valueList by model.messages.collectAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
         LaunchedEffect(valueList) {
-            if (!valueList.isNullOrEmpty()) {
+            if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
                 notificationManagerWrapper.showNotification(
                     "New message received",
                     "You have a new message"
                 )
-                listState.scrollToItem(valueList?.lastIndex ?: 0)
+                listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
 
             }
         }
         LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-            items(valueList?.size ?: 0) { index ->
+            items(valueList.messagesDatabaseList?.size ?: 0) { index ->
                 ShowChat(
-                    valueList?.get(index) ?: Message("","viesti tuli perille ilman dataa","",false),
+                    valueList.messagesDatabaseList?.get(index) ?: Message("","viesti tuli perille ilman dataa","",false),
                     colorsOnOff = colorsOnOff
                 )
             }

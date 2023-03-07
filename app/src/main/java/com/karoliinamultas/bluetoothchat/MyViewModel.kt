@@ -12,10 +12,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karoliinamultas.bluetoothchat.data.Message
-import com.karoliinamultas.bluetoothchat.data.MessagesDatabaseList
+import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
@@ -26,9 +30,16 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     lateinit var currentAdvertisingSet: AdvertisingSet
-    var messages = MutableLiveData<List<Message>>(listOf())
+
     var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING 1", "DEBUGGING 2"))
     var beaconFilter = MutableLiveData<String>("")
+    val messages: StateFlow<MessagesListUiState> =
+        messagesRepository.getChatMessages().map { MessagesListUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000L),
+                initialValue = MessagesListUiState()
+            )
     var uuids: List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
@@ -73,7 +84,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 Log.d("message content", splitMessage.size.toString())
                 if (splitMessage[3] == "0") {
 
-                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
+//                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
 //                    messages.postValue(messages.value?.plus(splitMessage[2]))
                     uuids += splitMessage[1]
                     Log.d(
@@ -232,7 +243,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 buildMessage = beaconFilter.value + "//" + uuidl + "//" + message + "//0"
                 uuids += uuidl
                 /** maybe */
-                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
+//                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
 //                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
@@ -246,7 +257,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 buildMessage = beaconFilter.value + "//" + uuid + "//" + message + "//0"
                 uuids += uuid
                 /** maybe */
-                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
+//                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
 //                messages.postValue(messages.value?.plus(message))
                 viewModelScope.launch {
                     saveMessageToDatabase(
@@ -374,13 +385,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     fun chatRoomOnJoinDatabaseChanges(chatId: String) {
         viewModelScope.launch {
             deleteOtherMessagesFromDatabase(chatId)
-            getChatMessagesFromDatabase(chatId)
-            messages.value = MessagesDatabaseList.messagesDatabaseList.map { it }
         }
     }
-    suspend fun getChatMessagesFromDatabase(chatId: String) {
-        MessagesDatabaseList.messagesDatabaseList = messagesRepository.getChatMessages(chatId)
-    }
+
     suspend fun deleteOtherMessagesFromDatabase(chatId: String) {
         messagesRepository.deleteOtherChatMessages(chatId)
     }

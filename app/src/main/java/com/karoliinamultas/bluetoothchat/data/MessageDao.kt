@@ -14,8 +14,8 @@ interface MessageDao {
     @Delete
     suspend fun delete(message: Message)
 
-    @Query("SELECT * FROM messages WHERE chat_id = :chatId")
-    suspend fun getChatMessages(chatId: String): List<Message>
+    @Query("SELECT * FROM messages")
+    fun getChatMessages(): Flow<List<Message>>
 
     @Query("DELETE FROM messages")
     suspend fun deleteAllChatMessages()
