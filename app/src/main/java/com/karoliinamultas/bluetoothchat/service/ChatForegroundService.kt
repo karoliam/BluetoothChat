@@ -74,7 +74,7 @@ class ChatForegroundService() : Service() {
 //
 //        notificationManager.notify(MESSAGE_NOTIFICATION_ID.toInt(), builder.build())
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
-        val notif = notificationManagerWrapper.showNotification(title = "New message", "You received a new message")
+        val notif = notificationManagerWrapper.showNotification(title = "New message", "You received a new dog")
         startForeground(MESSAGE_NOTIFICATION_ID, notif)
         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter

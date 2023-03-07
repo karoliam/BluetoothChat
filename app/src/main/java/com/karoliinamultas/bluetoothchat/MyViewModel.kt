@@ -84,6 +84,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         )
 
                     }
+                    // notifikaatio ehk
                 } else {
                     Log.d("package", "byteArray ${splitMessage[2]} the thing ${splitMessage[3]}")
                     val packageSize = splitMessage[3].split("/")

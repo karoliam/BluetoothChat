@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
         }
 
 
-        model = MyViewModel(mBluetoothAdapter!!)
+//        model = MyViewModel(mBluetoothAdapter!!)
         setContent {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
             //Navia
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
                             ShowChats(navController = navController, mBluetoothAdapter!!, model)
                         }
                         composable(route = Screen.ChatWindow.route){
-                            ChatWindow(navController = navController, mBluetoothAdapter!!, model)
+                            ChatWindow(navController = navController, notificationManagerWrapper, mBluetoothAdapter!!, model)
                         }
                         composable(route = Screen.DrawingPad.route){
                             DrawingPad(context, navController = navController, model, mBluetoothAdapter!!)
@@ -130,8 +130,6 @@ class MainActivity : ComponentActivity() {
         super.onPause()
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
         startForegroundService(chatForegroundServiceIntent)
-    }
-
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -150,10 +148,13 @@ class MainActivity : ComponentActivity() {
                 chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
                 startForegroundService(chatForegroundServiceIntent)
             }
-            } else {
-                // Permission is not granted, show a message to the user
-            }
+        } else {
+            // Permission is not granted, show a message to the user
+        }
     }
+
+    }
+
 
 
 
