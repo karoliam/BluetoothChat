@@ -202,7 +202,7 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
         Surface(modifier = Modifier
             .padding(all = Dp(0f))
             .fillMaxHeight(0.89f)){
-            ChatsList(model, colorsOnOff = colorsOnOff)
+            ChatsList(model, colorsOnOff = colorsOnOff, notificationManagerWrapper = notificationManagerWrapper)
         }
         InputField( modifier, navController, mBluetoothAdapter, model)
     }
@@ -303,12 +303,11 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 )
                             }
                         }
-                        .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
                         .background(color = MaterialTheme.colorScheme.surface)
                         .fillMaxWidth()) {
                     Row(
                         Modifier
-                            .requiredSizeIn(360.dp, 80.dp, 360.dp, 150.dp)
+                            .requiredSizeIn(400.dp, 80.dp, 400.dp, 150.dp)
                             .height(80.dp)
                             .padding(5.dp)
                             .fillMaxWidth()
@@ -326,8 +325,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                             placeholder = { Text(text = "Enter your message", color = Color(0xFF242124).copy(0.5f)) },
                             trailingIcon = {
                                 Row() {
-                                    androidx.compose.material3.Divider(
-                                        color = MaterialTheme.colorScheme.background.copy(0.2f),
+                                    androidx.compose.material.Divider(
+                                        color = Color(0xFF242124).copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
                                         modifier = Modifier
                                             .padding(0.dp, 8.dp, 0.dp, 0.dp)
                                             .fillMaxHeight(0.8f)  //fill the max height
@@ -416,26 +415,29 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
     val valueList: List<String>? by model.messages.observeAsState()
     val listState = rememberLazyListState()
-    LazyColumn(state = listState, modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
-    LaunchedEffect(valueList) {
-        if (!valueList.isNullOrEmpty()) {
-            // Value list has changed, show a notification
-            notificationManagerWrapper.showNotification("New message received", "You have a new message")
-            listState.scrollToItem(valueList?.lastIndex ?: 0)
+        LaunchedEffect(valueList) {
+            if (!valueList.isNullOrEmpty()) {
+                // Value list has changed, show a notification
+                notificationManagerWrapper.showNotification(
+                    "New message received",
+                    "You have a new message"
+                )
+                listState.scrollToItem(valueList?.lastIndex ?: 0)
 
+            }
         }
-    }
-    LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-        items(valueList?.size ?: 0) { index ->
-            ShowChat(valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa", colorsOnOff = colorsOnOff)
+        LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            items(valueList?.size ?: 0) { index ->
+                ShowChat(
+                    valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa",
+                    colorsOnOff = colorsOnOff
+                )
+            }
         }
-    }
 //    if(valueList!!.size > 0){
 //    LaunchedEffect(valueList?.size) {
 //        listState.scrollToItem(valueList?.lastIndex ?: 0)
 //    }
 //    }
-}
+    }
