@@ -1,19 +1,26 @@
 package com.karoliinamultas.bluetoothchat
 
 
-
 import android.annotation.SuppressLint
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
+import android.content.Context
+import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
+import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,8 +30,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.math.log
 
 private const val TAG = "MyViewModelTAG"
+
 class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -47,16 +56,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
     var compressedBitmap = MutableLiveData<ByteArray>()
-
     // file recieving and sending stuff
     var fRecieving = MutableLiveData<Boolean>(false)
     var recievedPackages: Array<String> = arrayOf()
     var packageUUID: String = ""
     var fileInParts: Array<ByteArray> = arrayOf()
 
-
     // Create an AdvertiseData object to include data in the advertisement
-
 
     val parameters = AdvertisingSetParameters.Builder()
         .setLegacyMode(false)
@@ -72,20 +78,23 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             super.onScanResult(callbackType, result)
             val serviceData = result.scanRecord?.getServiceData(ParcelUuid(UUID_APP_SERVICE))
             val splitMessage = String(
-                serviceData ?: "".toByteArray(Charsets.UTF_8),
+                serviceData ?: "".toByteArray(),
                 Charset.defaultCharset()
-            ).split("//")
+            ).split("/*/")
+                Log.d(
+                    "package",
+                    "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
+                )
 
             /** maybe */
             val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
 
-            if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0])) {
-
+            if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
-                if (splitMessage[3] == "0") {
+                if (splitMessage[2] == "0") {
 
 //                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
-//                    messages.postValue(messages.value?.plus(splitMessage[2]))
+//                    messages.postValue(messages.value?.plus(splitMessage[3]))
                     uuids += splitMessage[1]
                     Log.d(
                         "hei",
@@ -98,22 +107,43 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         sendMessage(
                             mBluetoothAdapter,
                             mBluetoothAdapter.bluetoothLeScanner,
-                            splitMessage[2],
+                            splitMessage[3],
                             splitMessage[1]
                         )
 
                     }
-                    // notifikaatio ehk
+
                 } else {
+                    Log.d(
+                        "files",
+                        "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]} the thing 3 ${splitMessage[3]} }"
+                    )
+                    val packageSize = splitMessage[2].split("/")
+//                    fRecieving.postValue(true)
+//                    if (fileInParts.size == 0) {
+//                        packageUUID = splitMessage[1]
+//                        fileInParts =
+//                            Array<ByteArray>(Integer.parseInt(packageSize[1]!!)) { i -> "".toByteArray() }
+//                    }
+//                    if (splitMessage[1] == packageUUID) {
+//                        fileInParts[Integer.parseInt(packageSize[0]) - 1] =
+//                            splitMessage[2].toByteArray()
+//                    }
+//                    if (packageSize?.get(0)!! == packageSize?.get(1)!!) {
+//                        fRecieving.postValue(false)
+//                        Log.d("file length", fileInParts[0].size.toString())
+//                        glueFileTogether(fileInParts)
+//                    }
                     Log.d("package", "byteArray ${splitMessage[2]} the thing ${splitMessage[3]}")
-                    val packageSize = splitMessage[3].split("/")
                     fRecieving.postValue(true)
                     if (fileInParts.size == 0) {
                         packageUUID = splitMessage[1]
-                        fileInParts = Array<ByteArray>(Integer.parseInt(packageSize[1]!!) ) { i -> "".toByteArray() }
+                        fileInParts =
+                            Array<ByteArray>(Integer.parseInt(packageSize[1]!!)) { i -> "".toByteArray() }
                     }
                     if (splitMessage[1] == packageUUID) {
-                        fileInParts[Integer.parseInt(packageSize[0]) -1 ] = splitMessage[2].toByteArray(Charsets.UTF_8)
+                        fileInParts[Integer.parseInt(packageSize[0]) - 1] =
+                            splitMessage[2].toByteArray(Charsets.UTF_8)
                     }
 
 
@@ -124,8 +154,11 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                     }
                 }
             }
+            }
+
         }
-    }
+
+
     private val leScanCallbackBeacons: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
@@ -155,6 +188,16 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet) {
             Log.i("LOG_TAG", "onAdvertisingSetStopped():")
         }
+    }
+
+    @SuppressLint("SuspiciousIndentation")
+    fun glueFileTogether(parts: Array<ByteArray>) {
+        var byteLength: Int = 0
+        parts.forEach {
+            byteLength += it.size
+        }
+
+        Log.d("glued", byteLength.toString())
     }
 
     @SuppressLint("MissingPermission")
@@ -197,7 +240,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
     fun chopImage(byteArray: ByteArray, mBluetoothAdapter: BluetoothAdapter) {
 
-        val byteArrays = divideArray(byteArray, 1400)
+        val byteArrays = divideArray(byteArray, 1000)
         sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, "", "", byteArrays!!)
 
     }
@@ -226,7 +269,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "SuspiciousIndentation")
     fun sendMessage(
         mBluetoothAdapter: BluetoothAdapter,
         bluetoothLeScanner: BluetoothLeScanner,
@@ -240,7 +283,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         if (message != "") {
             if (uuid.isEmpty()) {
                 val uuidl = UUID.randomUUID().toString()
-                buildMessage = beaconFilter.value + "//" + uuidl + "//" + message + "//0"
+                buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/0/*/" + message
                 uuids += uuidl
                 /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
@@ -254,7 +297,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                     )
                 }
             } else {
-                buildMessage = beaconFilter.value + "//" + uuid + "//" + message + "//0"
+                buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/0/*/" + message
                 uuids += uuid
                 /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
@@ -273,9 +316,14 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             val uuidl = UUID.randomUUID().toString()
             var packageIndex: Int = 0
             sendPackage.forEach {
-                buildMessage =
-                    beaconFilter.value + "//" + uuidl + "//" + it + "//" + (packageIndex + 1) + "/" + sendPackage.size.toString()
-                sendPackage[packageIndex] = buildMessage.toByteArray(Charsets.UTF_8)
+                val messageFirstPart = (beaconFilter.value + "/*/" + uuidl + "/*/"+ (packageIndex + 1) + "/" + sendPackage.size.toString() + "/*/").toByteArray()
+
+                val result = ByteArray(messageFirstPart.size + it.size)
+                System.arraycopy(messageFirstPart, 0, result, 0, messageFirstPart.size)
+                System.arraycopy(it, 0, result, messageFirstPart.size, it.size)
+
+                Log.d("arrayLength", it.size.toString())
+                sendPackage[packageIndex] = result
                 packageIndex++
             }
         }
@@ -284,7 +332,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         viewModelScope.launch(Dispatchers.IO) {
                 stopScan(bluetoothLeScanner)
             sendPackage.forEach {
-//                delay(MESSAGE_PERIOD / 2)
+                delay(MESSAGE_PERIOD / 2)
                 val data = AdvertiseData.Builder()
                     .setIncludeDeviceName(true)
                     .addServiceData(
@@ -359,7 +407,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
     companion object GattAttributes {
         const val SCAN_PERIOD: Long = 10000
-        const val MESSAGE_PERIOD: Long = 700
+        const val MESSAGE_PERIOD: Long = 1000
         const val STATE_CONNECTING = 1
         const val STATE_CONNECTED = 2
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")

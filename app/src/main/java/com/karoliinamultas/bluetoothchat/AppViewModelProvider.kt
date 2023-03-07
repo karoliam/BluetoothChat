@@ -1,5 +1,6 @@
 package com.karoliinamultas.bluetoothchat
 
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -14,7 +15,9 @@ object AppViewModelProvider {
         // TODO : Initilizers for viewmodels like the one below
 
         initializer {
-            MyViewModel(bluetoothChatApplication().container.messagesRepository)
+            MyViewModel(
+                bluetoothChatApplication().container.messagesRepository
+            )
         }
     }
 }
