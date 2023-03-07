@@ -53,19 +53,18 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
 
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
             val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
             requestPermissions(permission, REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE)
 
         }
-
 
 //        model = MyViewModel(mBluetoothAdapter!!)
         setContent {
