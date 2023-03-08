@@ -64,8 +64,28 @@ class ComposeFileProvider : FileProvider(
 
 }
 
-
-
+@Composable
+fun ShowImage(urlText: URL) {
+    Log.d("moi", urlText.toString())
+    var savedBitmap by remember { mutableStateOf(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)) }
+    LaunchedEffect(urlText) {
+        savedBitmap = getImage(urlText)
+    }
+    Image(
+        bitmap = savedBitmap.asImageBitmap(),
+        contentDescription = "image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .size(56.dp)
+    )
+}
+private suspend fun getImage(url: URL): Bitmap =
+    withContext(Dispatchers.IO) {
+        val myConn = url.openStream()
+        return@withContext BitmapFactory.decodeStream(myConn)
+    }
 
 
 @Composable
@@ -97,6 +117,7 @@ fun CameraButton(
                 imageUri = uri
                 Log.d("uri", imageUri.toString())
                 cameraLauncher.launch(uri)
+//                ShowImage(urlText = URL(imageUri.toString()))
             } else {
                 // Permission is not granted, request it
                 ActivityCompat.requestPermissions(activity, arrayOf(cameraPermission), REQUEST_CAMERA_PERMISSION)

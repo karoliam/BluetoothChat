@@ -59,6 +59,9 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:1.1.1"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
     implementation 'androidx.core:core-ktx:1.7.0'
+    //url to image
+    implementation "io.coil-kt:coil-compose:2.2.2"
+
 // serialize
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 

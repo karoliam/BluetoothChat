@@ -17,6 +17,8 @@
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
 
     <application
+        android:fullBackupOnly="false"
+
         android:name=".BluetoothChatApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
