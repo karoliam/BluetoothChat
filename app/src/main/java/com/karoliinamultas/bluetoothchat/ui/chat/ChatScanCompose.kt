@@ -51,7 +51,7 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
     Scaffold(
         topBar = {
             TopAppBar(
-                elevation = 5.dp,
+                elevation = 8.dp,
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
