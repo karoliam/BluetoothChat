@@ -10,9 +10,7 @@ interface MessagesRepository {
 
     suspend fun deleteMessage(message: Message)
 
-    fun getChatMessages(): Flow<List<Message>>
-
-    fun getMessageUuids(): Flow<List<String>>
+     fun getChatMessages(): Flow<List<Message>>
 
     suspend fun deleteAllChatMessages()
 

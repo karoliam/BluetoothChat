@@ -45,14 +45,13 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE = 2
-private val REQUEST_IMAGE_CAPTURE = 3
+private val REQUEST_IMAGE_CAPTURE = 1
 private lateinit var chatForegroundServiceIntent: Intent
 class MainActivity : ComponentActivity() {
     var mBluetoothAdapter: BluetoothAdapter? = null
 
     @RequiresApi(Build.VERSION_CODES.P)
     @OptIn(ExperimentalMaterial3Api::class)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -63,8 +62,9 @@ class MainActivity : ComponentActivity() {
         startForegroundService(chatForegroundServiceIntent)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
-            val permission = arrayOf(Manifest.permission.BLUETOOTH)
+            val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
             requestPermissions(permission, REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE)
+
         }
 
 //        startForegroundService(chatForegroundServiceIntent)

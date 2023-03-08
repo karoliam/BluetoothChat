@@ -1,11 +1,14 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
 
+//import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import android.bluetooth.BluetoothAdapter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -28,13 +33,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
@@ -44,7 +49,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -59,6 +63,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
@@ -67,16 +73,19 @@ import kotlinx.coroutines.Dispatchers
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 //import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 
 private const val TAG = "ChatCompose"
 
 
-
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ChatWindow(navController: NavController,
@@ -105,8 +114,7 @@ fun ChatWindow(navController: NavController,
     val chatName = model.beaconFilter.observeAsState()
 
     //Topbar
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+    Scaffold(containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             TopAppBar(
@@ -125,16 +133,14 @@ fun ChatWindow(navController: NavController,
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate(Screen.ShowChats.route) }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back button"
+                            imageVector = Icons.Filled.ArrowBack, contentDescription = "Back button"
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
                         Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu button"
+                            imageVector = Icons.Filled.Menu, contentDescription = "Menu button"
                         )
                     }
                     androidx.compose.material3.DropdownMenu(
@@ -149,42 +155,69 @@ fun ChatWindow(navController: NavController,
                 },
             )
         },
-        content = { innerPadding->
+        content = { innerPadding ->
             Column(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
                 Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model, colorsOnOff, imageModel, drawingViewModel)
             }
-        }
-    )
+        })
 }
-private suspend fun getImage(url: URL): Bitmap =
-    withContext(Dispatchers.IO) {
-        val myConn = url.openStream()
-        return@withContext BitmapFactory.decodeStream(myConn)
+
+private suspend fun getImage(url: URL): Bitmap = withContext(Dispatchers.IO) {
+    val myConn = url.openStream()
+    return@withContext BitmapFactory.decodeStream(myConn)
+}
+fun getBitmapFromURL(src: String?): Bitmap? {
+    return try {
+
+
+        val url = URL(src)
+        val connection: HttpURLConnection = url
+            .openConnection() as HttpURLConnection
+        connection.setDoInput(true)
+        connection.connect()
+        val input: InputStream = connection.getInputStream()
+        BitmapFactory.decodeStream(input)
+    } catch (e: Exception) {
+        Log.d("vk21", e.toString())
+        null
     }
+}
 @Composable
-fun ShowImage(urlText: URL) {
-    var savedBitmap by remember { mutableStateOf(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)) }
-    LaunchedEffect(urlText) {
-        savedBitmap = getImage(urlText)
-    }
+fun ShowImage(urlText: String) {
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(urlText)
+            .size(coil.size.Size.ORIGINAL) // Set the target size to load the image at.
+            .build()
+    )
+
+
     Image(
-        bitmap = savedBitmap.asImageBitmap(),
+        painter = painter ,
         contentDescription = "image",
         contentScale = ContentScale.Crop,
+
         modifier = Modifier
-            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 16.dp)
             .clip(RoundedCornerShape(8.dp))
-            .size(56.dp)
+
+//            .width(240.dp)
+//            .height(300.dp)
+            .size(406.dp)
     )
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
-
-    val messageHorizontalArrangement = if (message.local_message) Arrangement.End else Arrangement.Start
+    val regex = message.message_content.split(":")
+    val isImage = regex[0].equals("https")
+    val messageHorizontalArrangement =
+        if (message.local_message) Arrangement.End else Arrangement.Start
 
     val textColors_random = listOf(
         Color(0xFF1B264F),
@@ -193,7 +226,8 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
         Color(0xFF302B27),
         Color(0xFFF5F3F5))
 
-    val randomTexts = if(colorsOnOff.value) MaterialTheme.colorScheme.background else textColors_random.random()
+    val randomTexts =
+        if (colorsOnOff.value) MaterialTheme.colorScheme.background else textColors_random.random()
 
 
     val backgroundColors_random = listOf(
@@ -203,13 +237,13 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
         Color(0xFFF7DD72),
         Color(0xFFEF233C))
 
-    val randomBack = if(colorsOnOff.value) MaterialTheme.colorScheme.onBackground else backgroundColors_random.random()
+    val randomBack =
+        if (colorsOnOff.value) MaterialTheme.colorScheme.onBackground else backgroundColors_random.random()
 
     Row(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = messageHorizontalArrangement
+            .fillMaxWidth(), horizontalArrangement = messageHorizontalArrangement
     ) {
         Card(
             modifier = Modifier
@@ -219,12 +253,21 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
             colors = CardDefaults.cardColors(containerColor = randomBack),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            Text(text = message.message_content, color = randomTexts, modifier = Modifier.padding(10.dp))
+            if (isImage){
+                ShowImage(urlText = message.message_content)
+            } else {
+            Text(
+                text = message.message_content,
+                color = randomTexts,
+                modifier = Modifier.padding(10.dp)
+            )
+            }
         }
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Chats( modifier: Modifier = Modifier,
            notificationManagerWrapper: NotificationManagerWrapper,
@@ -255,9 +298,8 @@ fun Chats( modifier: Modifier = Modifier,
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
-    ExperimentalComposeUiApi::class
-)
+@RequiresApi(Build.VERSION_CODES.P)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel, imageModel: ImageViewModel, drawingViewModel: DrawingPadViewModel) {
     val context = LocalContext.current
@@ -265,8 +307,9 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     //BotMenu
     // Declaring a Boolean value to
     // store bottom sheet collapsed state
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState =
-    BottomSheetState(BottomSheetValue.Collapsed))
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+    )
 
     // Declaring Coroutine scope
     val coroutineScope = rememberCoroutineScope()
@@ -277,14 +320,18 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
     val isVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     BottomSheetScaffold(
-            scaffoldState = bottomSheetScaffoldState,
-            sheetContent =  {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))) {
-                    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.End) {
+        scaffoldState = bottomSheetScaffoldState, sheetContent = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
+            ) {
+                Column(
+                    Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.End
+                ) {
 
                             IconButton(
                                 onClick = {
@@ -456,7 +503,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         }
                     )
 
-                }
+            }
         }
     }
 }
@@ -464,7 +511,12 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 
 @Composable
-fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
+fun ChatsList(
+    model: MyViewModel/*messagesList: List<Message>*/,
+    notificationManagerWrapper: NotificationManagerWrapper,
+    modifier: Modifier = Modifier,
+    colorsOnOff: MutableState<Boolean>
+) {
     val valueList by model.messages.collectAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
@@ -477,16 +529,20 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
 //                )
                 listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
 
-            }
         }
-        LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-            items(valueList.messagesDatabaseList?.size ?: 0) { index ->
-                ShowChat(
-                    valueList.messagesDatabaseList?.get(index) ?: Message("","viesti tuli perille ilman dataa","",false),
-                    colorsOnOff = colorsOnOff
-                )
-                }
-            }
+    }
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        items(valueList.messagesDatabaseList?.size ?: 0) { index ->
+            ShowChat(
+                valueList.messagesDatabaseList?.get(index) ?: Message(
+                    "", "viesti tuli perille ilman dataa", "", false
+                ), colorsOnOff = colorsOnOff
+            )
         }
-
-
+    }
+}
