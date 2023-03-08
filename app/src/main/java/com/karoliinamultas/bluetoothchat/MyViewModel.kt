@@ -84,7 +84,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     }
     //    callBack is what triggers when scanner found needed service uuid
 
-    fun uploadImage(param1: String, param2: String, param3:String, navController: NavController){
+    fun uploadImage(param1: String, param2: String, param3:String){
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler){
             val responce = repository.getPress(param1, param2, param3)
             imageUrl = responce.image.url

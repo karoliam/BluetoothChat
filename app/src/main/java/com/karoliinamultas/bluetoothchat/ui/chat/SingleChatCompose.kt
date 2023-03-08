@@ -386,7 +386,7 @@ fun InputField(
                                     contentDescription = "Localized description"
                                 )
                             })
-                        CameraButton(context)
+                        CameraButton(context, model)
                         GalleryButton(context)
                     }
                 }
