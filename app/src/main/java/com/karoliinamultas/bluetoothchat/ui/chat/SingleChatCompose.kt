@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -31,22 +33,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -79,6 +79,7 @@ import java.net.URL
 private const val TAG = "ChatCompose"
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ChatWindow(
@@ -386,133 +387,6 @@ fun InputField(
             }
         }, sheetPeekHeight = 0.dp
     ) {
-
-        Box(
-            Modifier
-                .drawWithCache {
-                    val offsetY = (-5).dp.toPx()
-                    val shadowColor = Color.Black
-                    val shadowAlpha = 0.3f
-                    val shadowBlur = 6.dp.toPx()
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(
-                            shadowColor.copy(alpha = shadowAlpha),
-                            Offset(0f, offsetY),
-                            size = Size(size.width, shadowBlur),
-                            alpha = shadowAlpha,
-                            style = Fill
-                        )
-                    }
-                }
-                .background(color = MaterialTheme.colorScheme.surface)
-                .fillMaxWidth()
-                .fillMaxHeight(1f)) {
-            Row(
-                Modifier
-                    .requiredHeightIn(80.dp, 80.dp)
-                    .padding(5.dp)
-                    .fillMaxWidth()
-            ) {
-                TextField(
-                    value = text,
-                    onValueChange = {
-                        text = it
-                    },
-                    Modifier
-                        .weight(8f)
-                        .padding(10.dp, 5.dp, 5.dp, 5.dp)
-                        .focusRequester(focusRequester),
-                    shape = RoundedCornerShape(5.dp),
-                    placeholder = {
-                        Text(
-                            text = "Enter your message", color = Color(0xFF242124).copy(0.5f)
-                        )
-                    },
-                    trailingIcon = {
-                        Row() {
-                            androidx.compose.material.Divider(
-                                color = Color(0xFF242124).copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
-                                modifier = Modifier
-                                    .padding(0.dp, 8.dp, 0.dp, 0.dp)
-                                    .fillMaxHeight(0.8f)  //fill the max height
-                                    .width(1.dp)
-                            )
-                            IconButton(onClick = {
-                                coroutineScope.launch {
-                                    if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                                        bottomSheetScaffoldState.bottomSheetState.expand()
-                                    } else {
-                                        bottomSheetScaffoldState.bottomSheetState.collapse()
-                                    }
-                                }
-                            },
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .width(60.dp),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = Color(
-                                        0xFF242124
-                                    )
-                                ),
-                                content = {
-                                    Icon(
-                                        imageVector = Icons.Filled.KeyboardArrowUp,
-                                        contentDescription = "Localized description"
-                                    )
-                                })
-                        }
-                            IconButton(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        if (bottomSheetScaffoldState.bottomSheetState.isExpanded) {
-                                            bottomSheetScaffoldState.bottomSheetState.collapse()
-                                        } else {
-                                            bottomSheetScaffoldState.bottomSheetState.expand()
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .width(60.dp)
-                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                                content = {
-                                    Icon(
-                                        imageVector = Icons.Filled.KeyboardArrowDown,
-                                        contentDescription = "Localized description"
-                                    )
-                                }
-                            )}
-                    Column(
-                        Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Row() {
-                            IconButton(
-                                onClick = { navController.navigate(Screen.DrawingPad.route) },
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .width(60.dp)
-                                    .padding(0.dp, 6.dp, 0.dp, 0.dp),
-                                colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                                content = {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.draw),
-                                        contentDescription = "Localized description"
-                                    )
-                                }
-                            )
-                            CameraButton(context)
-                            GalleryButton(context)
-                        }
-                    }
-                }
-            },
-            sheetPeekHeight = 0.dp
-        ){
-
             Box(
                 Modifier
                     .background(color = MaterialTheme.colorScheme.background)
@@ -672,5 +546,4 @@ fun ChatsList(
             )
         }
     }
-}
 }
