@@ -119,11 +119,6 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                         expanded = mDisplayMenu,
                         onDismissRequest = { mDisplayMenu = false }
                     ) {
-                        // Creating dropdown menu item, on click
-                        // would create a Toast message
-                        DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
-                            Text(text = "Settings")
-                        }
                         DropdownMenuItem(onClick = { colorsOnOff.value = !colorsOnOff.value }){
                             val chatColorText = if(colorsOnOff.value) "Colorful mode" else "Colorblind mode"
                             Text(text = chatColorText)
@@ -149,21 +144,21 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
 fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
 
     val textColors_random = listOf(
-        Color(0xFF00FDDC),
-        Color(0xFFFFFFFF),
-        Color(0xFF04E762),
-        Color(0xFFFDE74C),
-        Color(0xFFFF4365))
+        Color(0xFF1B264F),
+        Color(0xFF253031),
+        Color(0xFF522B47),
+        Color(0xFF302B27),
+        Color(0xFFF5F3F5))
 
     val randomTexts = if(colorsOnOff.value) MaterialTheme.colorScheme.background else textColors_random.random()
 
 
     val backgroundColors_random = listOf(
-        Color(0xFF111D4A),
-        Color(0xFF43AA8B),
-        Color(0xFF8B635C),
-        Color(0xFF60594D),
-        Color(0xFF93A29B))
+        Color(0xFF4381C1),
+        Color(0xFF45F0DF),
+        Color(0xFFD8A7CA),
+        Color(0xFFF7DD72),
+        Color(0xFFEF233C))
 
     val randomBack = if(colorsOnOff.value) MaterialTheme.colorScheme.onBackground else backgroundColors_random.random()
 
@@ -198,10 +193,14 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
 
         Surface(modifier = Modifier
             .padding(all = Dp(0f))
-            .fillMaxHeight(0.89f)){
+            .weight(1f)
+            .fillMaxHeight()){
             ChatsList(model, colorsOnOff = colorsOnOff, notificationManagerWrapper = notificationManagerWrapper)
         }
-        InputField( modifier, navController, mBluetoothAdapter, model)
+        BottomNavigation(elevation = 0.dp, modifier = Modifier.fillMaxWidth().height(65.dp)) {
+
+            InputField(modifier = Modifier.weight(1f), navController, mBluetoothAdapter, model)
+        }
     }
 }
 
@@ -291,113 +290,129 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                 Modifier
                     .background(color = MaterialTheme.colorScheme.background)
                     .fillMaxWidth()
-                    .fillMaxHeight(1f)
-                    .padding(6.dp, 1.dp, 10.dp, 10.dp)
-                        ) {
-                    Row(
+                    .fillMaxHeight()
+                    .padding(6.dp, 1.dp, 10.dp, 10.dp),
+            ) {
+                Row(
+                    Modifier
+                        .requiredHeightIn(80.dp, 80.dp)
+                        .padding(5.dp)
+                        .fillMaxWidth()
+                ) {
+                    TextField(
+                        value = text,
+                        onValueChange = {
+                            text = it
+                        },
                         Modifier
-                            .requiredHeightIn(80.dp, 80.dp)
-                            .padding(5.dp)
-                            .fillMaxWidth()
-                    ) {
-                        TextField(
-                            value = text,
-                            onValueChange = {
-                                text = it
-                            },
-                            Modifier
-                                .weight(9f)
-                                .padding(6.dp, 8.dp, 8.dp, 8.dp)
-                                .focusRequester(focusRequester),
-                            shape = RoundedCornerShape(50.dp),
-                            placeholder = { Text(text = "Message", color = MaterialTheme.colorScheme.background.copy(0.5f)) },
-                            trailingIcon = {
-                                Row() {
-                                    androidx.compose.material.Divider(
-                                        color = MaterialTheme.colorScheme.background.copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
-                                        modifier = Modifier
-                                            .padding(0.dp, 10.dp, 0.dp, 0.dp)
-                                            .fillMaxHeight(0.8f)  //fill the max height
-                                            .width(1.dp)
-                                    )
-                                    IconButton(
-                                        onClick = { Log.d("Hitoo", isVisible.toString()) ; coroutineScope.launch {
-                                            if (bottomSheetScaffoldState.bottomSheetState.isCollapsed){
-                                                bottomSheetScaffoldState.bottomSheetState.expand()
-                                            }else{
-                                                bottomSheetScaffoldState.bottomSheetState.collapse()
-                                            }
-                                        } },
-                                        modifier = Modifier
-                                            .height(60.dp)
-                                            .width(60.dp),
-                                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-                                        content = {
-                                            Icon(
-                                                imageVector = Icons.Filled.KeyboardArrowUp,
-                                                contentDescription = "Localized description"
-                                            )
+                            .padding(6.dp, 8.dp, 8.dp, 8.dp)
+                            .focusRequester(focusRequester),
+                        shape = RoundedCornerShape(50.dp),
+                        placeholder = {
+                            Text(
+                                text = "Message",
+                                color = MaterialTheme.colorScheme.background.copy(0.5f)
+                            )
+                        },
+                        trailingIcon = {
+                            Row() {
+                                androidx.compose.material.Divider(
+                                    color = MaterialTheme.colorScheme.background.copy(0.3f), //MaterialTheme.colorScheme.background.copy(0.2f),
+                                    modifier = Modifier
+                                        .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                                        .fillMaxHeight(0.8f)  //fill the max height
+                                        .width(1.dp)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        Log.d(
+                                            "Hitoo",
+                                            isVisible.toString()
+                                        ); coroutineScope.launch {
+                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
                                         }
-                                    )
-                                }
+                                    }
+                                    },
+                                    modifier = Modifier
+                                        .height(60.dp)
+                                        .width(60.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+                                    content = {
+                                        Icon(
+                                            imageVector = Icons.Filled.KeyboardArrowUp,
+                                            contentDescription = "Localized description"
+                                        )
+                                    }
+                                )
+                            }
 
-                            },
-                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences,
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Done,
-                            ),
-                            textStyle = TextStyle(
-                                color = MaterialTheme.colorScheme.background,
-                                fontSize = TextUnit.Unspecified,
-                                fontFamily = FontFamily.SansSerif
-                            ),
-                            maxLines = 20,
-                            singleLine = false,
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = MaterialTheme.colorScheme.onBackground,
-                                textColor = MaterialTheme.colorScheme.background,
-                                disabledTextColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent)
+                        },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Done,
+                        ),
+                        textStyle = TextStyle(
+                            color = MaterialTheme.colorScheme.background,
+                            fontSize = TextUnit.Unspecified,
+                            fontFamily = FontFamily.SansSerif
+                        ),
+                        maxLines = 20,
+                        singleLine = false,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.onBackground,
+                            textColor = MaterialTheme.colorScheme.background,
+                            disabledTextColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent
                         )
+                    )
 
-                IconButton(
-                    onClick = {
-                        if(!model.mSending.value!!){
-                        model.sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, text, "")
-                        text = ""
-                        } else {
-                            Toast.makeText(context, "sending message", Toast.LENGTH_SHORT).show()
+                    IconButton(
+                        onClick = {
+                            if (!model.mSending.value!!) {
+                                model.sendMessage(
+                                    mBluetoothAdapter,
+                                    mBluetoothAdapter.bluetoothLeScanner,
+                                    text,
+                                    ""
+                                )
+                                text = ""
+                            } else {
+                                Toast.makeText(context, "sending message", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        },
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(50.dp)
+                            .padding(0.dp, 0.dp, 0.dp, 0.dp)
+                            .align(CenterVertically)
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                RoundedCornerShape(100.dp)
+                            ),
+                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                        content = {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                modifier = Modifier
+                                    .padding(3.dp, 0.dp, 0.dp, 0.dp)
+                                    .height(28.dp)
+                                    .width(28.dp),
+                                contentDescription = "Localized description"
+                            )
                         }
-                              },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(50.dp)
-                        .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                        .align(CenterVertically)
-                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(100.dp)),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Filled.Send,
-                            modifier = Modifier
-                                .padding(3.dp, 0.dp, 0.dp, 0.dp)
-                                .height(28.dp)
-                                .width(28.dp),
-                            contentDescription = "Localized description"
-                        )
-                    }
-                )
+                    )
 
 
-
-
-
-            }
-            }
+                }
+        }
     }
 }
 
