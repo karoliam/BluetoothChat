@@ -59,7 +59,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.data.Message
-import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
+//import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 
 
@@ -154,6 +154,8 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
 @Composable
 fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
 
+    val messageHorizontalArrangement = if (message.local_message) Arrangement.End else Arrangement.Start
+
     val textColors_random = listOf(
         Color(0xFF00FDDC),
         Color(0xFFFFFFFF),
@@ -175,13 +177,13 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
 
     Row(
         modifier = Modifier
-            .padding(2.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = messageHorizontalArrangement
     ) {
         Card(
             modifier = Modifier
-                .width(200.dp)
+                .width(256.dp)
                 .padding(5.dp),
 
             colors = CardDefaults.cardColors(containerColor = randomBack),
