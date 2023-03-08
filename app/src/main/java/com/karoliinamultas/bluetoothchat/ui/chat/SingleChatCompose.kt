@@ -32,7 +32,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -40,10 +39,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -66,6 +63,8 @@ import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.Dispatchers
+import com.karoliinamultas.bluetoothchat.data.Message
+//import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
@@ -180,7 +179,9 @@ fun ShowImage(urlText: URL) {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
+fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
+
+    val messageHorizontalArrangement = if (message.local_message) Arrangement.End else Arrangement.Start
 
     val textColors_random = listOf(
         Color(0xFF00FDDC),
@@ -203,19 +204,19 @@ fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: Mutable
 
     Row(
         modifier = Modifier
-            .padding(2.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = messageHorizontalArrangement
     ) {
         Card(
             modifier = Modifier
-                .width(200.dp)
+                .width(256.dp)
                 .padding(5.dp),
 
             colors = CardDefaults.cardColors(containerColor = randomBack),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            Text(text = message, color = randomTexts, modifier = Modifier.padding(10.dp))
+            Text(text = message.message_content, color = randomTexts, modifier = Modifier.padding(10.dp))
         }
     }
 }
@@ -511,33 +512,24 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 
 @Composable
 fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationManagerWrapper: NotificationManagerWrapper, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
-    val valueList: List<String>? by model.messages.observeAsState()
+    val valueList by model.messages.collectAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
-    LaunchedEffect(valueList) {
-            if (!valueList.isNullOrEmpty()) {
+        LaunchedEffect(valueList) {
+            if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
                 notificationManagerWrapper.showNotification(
                     "tossa on kissa",
                     "kissakoira"
                 )
-                listState.scrollToItem(valueList?.lastIndex ?: 0)
+                listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
+
             }
         }
-        LazyColumn(state = listState,modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)) {
-            items(valueList?.size ?: 0) { index ->
-                val split = valueList?.get(index)!!.split(":")
-                Log.d("moi",split[0].toString())
-
-                if(!split.isNullOrEmpty()){
-                if(split[0] == "https"){
-//                    ShowImage(urlText = URL(valueList?.get(index)))
-                }
-                } else {
+        LazyColumn(state = listState,modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            items(valueList.messagesDatabaseList?.size ?: 0) { index ->
                 ShowChat(
-                    valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa",
+                    valueList.messagesDatabaseList?.get(index) ?: Message("","viesti tuli perille ilman dataa","",false),
                     colorsOnOff = colorsOnOff
                 )
                 }

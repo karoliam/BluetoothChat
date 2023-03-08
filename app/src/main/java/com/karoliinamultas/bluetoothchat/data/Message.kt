@@ -12,8 +12,4 @@ data class Message(
     val local_message: Boolean,
 )
 
-data class MessagesDatabaseList(val messagesDatabaseList: List<Message> = listOf()) {
-    companion object {
-        var messagesDatabaseList = listOf<Message>()
-    }
-}
+data class MessagesListUiState(val messagesDatabaseList: List<Message> = listOf())
