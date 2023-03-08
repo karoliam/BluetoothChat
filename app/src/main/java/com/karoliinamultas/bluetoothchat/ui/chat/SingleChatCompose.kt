@@ -289,15 +289,15 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
             Box(
                 Modifier
                     .background(color = MaterialTheme.colorScheme.background)
-                    .fillMaxWidth()
                     .fillMaxHeight()
+                    .fillMaxWidth()
                     .padding(6.dp, 1.dp, 10.dp, 10.dp),
             ) {
                 Row(
                     Modifier
+                        .fillMaxWidth()
                         .requiredHeightIn(80.dp, 80.dp)
                         .padding(5.dp)
-                        .fillMaxWidth()
                 ) {
                     TextField(
                         value = text,
@@ -305,6 +305,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                             text = it
                         },
                         Modifier
+                            .width(285.dp)
                             .padding(6.dp, 8.dp, 8.dp, 8.dp)
                             .focusRequester(focusRequester),
                         shape = RoundedCornerShape(50.dp),
@@ -361,7 +362,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                             fontSize = TextUnit.Unspecified,
                             fontFamily = FontFamily.SansSerif
                         ),
-                        maxLines = 20,
+                        maxLines = 5,
                         singleLine = false,
                         colors = TextFieldDefaults.textFieldColors(
                             containerColor = MaterialTheme.colorScheme.onBackground,
