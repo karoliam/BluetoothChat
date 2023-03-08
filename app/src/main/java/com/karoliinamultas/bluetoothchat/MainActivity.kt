@@ -132,8 +132,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-//        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-//        startForegroundService(chatForegroundServiceIntent)
+        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+        startForegroundService(chatForegroundServiceIntent)
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
