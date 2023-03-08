@@ -17,9 +17,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karoliinamultas.bluetoothchat.data.Message
-import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
-import com.karoliinamultas.bluetoothchat.data.MessagesRepository
+import com.karoliinamultas.bluetoothchat.data.*
+import com.karoliinamultas.bluetoothchat.data.model.RequestModel
+import com.karoliinamultas.bluetoothchat.data.model.ResponseModel
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.math.log
@@ -49,6 +52,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 started = SharingStarted.WhileSubscribed(5_000L),
                 initialValue = MessagesListUiState()
             )
+    val messageUuids: StateFlow<MessageUuidsListUiState> =
+        messagesRepository.getMessageUuids().map { MessageUuidsListUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000L),
+                initialValue = MessageUuidsListUiState()
+            )
     var uuids: List<String> = listOf("uuids")
     private val mResults = java.util.HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
@@ -62,6 +72,8 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var packageUUID: String = ""
     var fileInParts: Array<ByteArray> = arrayOf()
 
+
+
     // Create an AdvertiseData object to include data in the advertisement
 
     val parameters = AdvertisingSetParameters.Builder()
@@ -72,6 +84,17 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         .setSecondaryPhy(BluetoothDevice.PHY_LE_2M)
 
     //    callBack is what triggers when scanner found needed service uuid
+//    val apiKey = "6d207e02198a847aa98d0a2a901485a5"
+//
+//    fun getImagesFromApi(photo: String): String {
+//        viewModelScope.launch{
+//            val imageResult = ImageApi.retrofitService.uploadImages(RequestModel(photo))
+//        }
+//    }
+
+
+
+
 
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -87,7 +110,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 )
 
             /** maybe */
-            val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
+            val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[3],splitMessage[0],false)
 
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())

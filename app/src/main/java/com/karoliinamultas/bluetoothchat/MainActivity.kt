@@ -29,6 +29,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.karoliinamultas.bluetoothchat.data.BluetoothChatDatabase
+import com.karoliinamultas.bluetoothchat.data.MessageDao
+import com.karoliinamultas.bluetoothchat.data.MessagesRepository
+import com.karoliinamultas.bluetoothchat.data.OfflineMessagesRepository
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import com.karoliinamultas.bluetoothchat.ui.DrawingPad
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
@@ -56,8 +60,11 @@ class MainActivity : ComponentActivity() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = bluetoothManager.adapter
 
+
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
+
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
@@ -69,6 +76,7 @@ class MainActivity : ComponentActivity() {
 //        model = MyViewModel(mBluetoothAdapter!!)
         setContent {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
             //Navia
             val navController = rememberNavController()
 
@@ -87,6 +95,7 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.BLUETOOTH_SCAN,
                             Manifest.permission.BLUETOOTH,
                             Manifest.permission.BLUETOOTH_ADMIN,
+                            Manifest.permission.FOREGROUND_SERVICE
                         )
                         .withListener(object : MultiplePermissionsListener {
                             override fun onPermissionsChecked(report: MultiplePermissionsReport) {

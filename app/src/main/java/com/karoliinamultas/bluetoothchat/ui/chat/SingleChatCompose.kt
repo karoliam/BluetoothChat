@@ -487,11 +487,7 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
         LaunchedEffect(valueList) {
             if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
-                // Value list has changed, show a notification
-                notificationManagerWrapper.showNotification(
-                    "tossa on kissa",
-                    "kissakoira"
-                )
+
                 listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
 
             }
