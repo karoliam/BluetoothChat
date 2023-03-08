@@ -276,6 +276,7 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
 }
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Chats(
     modifier: Modifier = Modifier,
