@@ -61,29 +61,29 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                         fontSize = 20.sp,
                     )
                 },
-                actions = {
-                    // Creating Icon button for dropdown menu
-                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu button"
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = mDisplayMenu,
-                        onDismissRequest = { mDisplayMenu = false }
-                    ) {
-                        // Creating dropdown menu item, on click
-                        // would create a Toast message
-                        androidx.compose.material.DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
-                            Text(text = "Settings")
-                        }
-                        androidx.compose.material.DropdownMenuItem(onClick = {  }){
-                            Text(text = "About")
-                        }
-                    }
-                },
+//                actions = {
+//                    // Creating Icon button for dropdown menu
+//                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Menu,
+//                            contentDescription = "Menu button"
+//                        )
+//                    }
+//
+//                    DropdownMenu(
+//                        expanded = mDisplayMenu,
+//                        onDismissRequest = { mDisplayMenu = false }
+//                    ) {
+//                        // Creating dropdown menu item, on click
+//                        // would create a Toast message
+//                        androidx.compose.material.DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
+//                            Text(text = "Settings")
+//                        }
+//                        androidx.compose.material.DropdownMenuItem(onClick = {  }){
+//                            Text(text = "About")
+//                        }
+//                    }
+//                },
             )
         },
         content = { innerPadding ->

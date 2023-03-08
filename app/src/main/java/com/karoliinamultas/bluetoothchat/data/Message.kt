@@ -13,3 +13,4 @@ data class Message(
 )
 
 data class MessagesListUiState(val messagesDatabaseList: List<Message> = listOf())
+data class MessageUuidsListUiState(val uuidsDatabaseList: List<String> = listOf())

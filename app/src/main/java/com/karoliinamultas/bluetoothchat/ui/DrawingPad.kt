@@ -359,7 +359,7 @@ Column(
                         Log.d("DBG", "byteArray before compress ${byteArray.size}")
 
                         model.uploadImage("6d207e02198a847aa98d0a2a901485a5",
-                            Base64.getEncoder().encodeToString(byteArray), "json")
+                            Base64.getEncoder().encodeToString(byteArray), "json", navController)
 
                     }
                 }

@@ -48,7 +48,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
     lateinit var currentAdvertisingSet: AdvertisingSet
 
-    var beacons = MutableLiveData<Set<String>>(setOf("DEBUGGING 1", "DEBUGGING 2"))
+    var beacons = MutableLiveData<Set<String>>(setOf("CHAT 1", "CHAT 2"))
     var beaconFilter = MutableLiveData<String>("")
     val messages: StateFlow<MessagesListUiState> =
         messagesRepository.getChatMessages().map { MessagesListUiState(it) }
@@ -84,7 +84,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     }
     //    callBack is what triggers when scanner found needed service uuid
 
-    fun uploadImage(param1: String, param2: String, param3:String){
+    fun uploadImage(param1: String, param2: String, param3:String, navController: NavController){
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler){
             val responce = repository.getPress(param1, param2, param3)
             imageUrl = responce.image.url
@@ -103,10 +103,10 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 serviceData ?: "".toByteArray(),
                 Charset.defaultCharset()
             ).split("/*/")
-                Log.d(
-                    "package",
-                    "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
-                )
+            Log.d(
+                "package",
+                "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
+            )
 
             /** maybe */
             val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
@@ -114,30 +114,30 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
 //                    messages.postValue(messages.value?.plus(splitMessage[3]))
-                    uuids += splitMessage[1]
-                    Log.d(
-                        "hei",
-                        String(
-                            serviceData ?: "t".toByteArray(Charsets.UTF_8),
-                            Charset.defaultCharset()
-                        )
+                uuids += splitMessage[1]
+                Log.d(
+                    "hei",
+                    String(
+                        serviceData ?: "t".toByteArray(Charsets.UTF_8),
+                        Charset.defaultCharset()
                     )
-                    if (!fRecieving.value!!) {
-                        sendMessage(
-                            mBluetoothAdapter,
-                            mBluetoothAdapter.bluetoothLeScanner,
-                            splitMessage[3],
-                            splitMessage[1],
-                            splitMessage[2]
-                        )
+                )
+                if (!fRecieving.value!!) {
+                    sendMessage(
+                        mBluetoothAdapter,
+                        mBluetoothAdapter.bluetoothLeScanner,
+                        splitMessage[3],
+                        splitMessage[1],
+                        splitMessage[2]
+                    )
 
-                    }
+                }
 
 
             }
-            }
-
         }
+
+    }
 
 
     private val leScanCallbackBeacons: ScanCallback = object : ScanCallback() {
@@ -255,63 +255,63 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     ) {
         var buildMessage: String = ""
         val leAdvertiser = mBluetoothAdapter.bluetoothLeAdvertiser
-            if (uuid.isEmpty()) {
-                val uuidl = UUID.randomUUID().toString()
-                buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/"+isUrl+"/*/" + message
-                uuids += uuidl
-                /** maybe */
+        if (uuid.isEmpty()) {
+            val uuidl = UUID.randomUUID().toString()
+            buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/"+isUrl+"/*/" + message
+            uuids += uuidl
+            /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
 //                messages.postValue(messages.value?.plus(message))
-                viewModelScope.launch {
-                    saveMessageToDatabase(
-                        uuidl,
-                        message,
-                        beaconFilter.value.toString(),
-                        true
-                    )
-                }
-            } else {
-                buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/"+isUrl+"/*/" + message
-                uuids += uuid
-                /** maybe */
+            viewModelScope.launch {
+                saveMessageToDatabase(
+                    uuidl,
+                    message,
+                    beaconFilter.value.toString(),
+                    true
+                )
+            }
+        } else {
+            buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/"+isUrl+"/*/" + message
+            uuids += uuid
+            /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
 //                messages.postValue(messages.value?.plus(message))
-                viewModelScope.launch {
-                    saveMessageToDatabase(
-                        uuid,
-                        message,
-                        beaconFilter.value.toString(),
-                        false
-                    )
-                }
+            viewModelScope.launch {
+                saveMessageToDatabase(
+                    uuid,
+                    message,
+                    beaconFilter.value.toString(),
+                    false
+                )
             }
+        }
 
 
 
         viewModelScope.launch(Dispatchers.IO) {
-                stopScan(bluetoothLeScanner)
-                val data = AdvertiseData.Builder()
-                    .setIncludeDeviceName(true)
-                    .addServiceData(
-                        ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")),
-                        buildMessage.toByteArray(Charsets.UTF_8)
-                    )
-                    .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
-                    .build()
-
-                mSending.postValue(true)
-                leAdvertiser.startAdvertisingSet(
-                    parameters.build(),
-                    data,
-                    null,
-                    null,
-                    null,
-                    callback
+            stopScan(bluetoothLeScanner)
+            val data = AdvertiseData.Builder()
+                .setIncludeDeviceName(true)
+                .addServiceData(
+                    ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")),
+                    buildMessage.toByteArray(Charsets.UTF_8)
                 )
-                delay(MESSAGE_PERIOD)
-                leAdvertiser.stopAdvertisingSet(callback)
-                Log.d("message", buildMessage)
-                mSending.postValue(false)
+                .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
+                .build()
+
+            mSending.postValue(true)
+            leAdvertiser.startAdvertisingSet(
+                parameters.build(),
+                data,
+                null,
+                null,
+                null,
+                callback
+            )
+            delay(MESSAGE_PERIOD)
+            leAdvertiser.stopAdvertisingSet(callback)
+            Log.d("message", buildMessage)
+            mSending.postValue(false)
 
             scanDevices(bluetoothLeScanner)
         }

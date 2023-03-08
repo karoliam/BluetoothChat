@@ -69,7 +69,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
-import kotlinx.coroutines.Dispatchers
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 //import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
@@ -360,7 +359,9 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row() {
+                        Row(Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center) {
                             IconButton(
                                 onClick = { navController.navigate(Screen.DrawingPad.route)
                                           model.uploadingImage=true},
