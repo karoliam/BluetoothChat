@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -113,6 +114,7 @@ fun CameraButton(
                 // Permission is already granted, launch the camera
                 val uri = ComposeFileProvider.getImageUri(context)
                 imageUri = uri
+                Log.d("uri", imageUri.toString())
                 cameraLauncher.launch(uri)
             } else {
                 // Permission is not granted, request it

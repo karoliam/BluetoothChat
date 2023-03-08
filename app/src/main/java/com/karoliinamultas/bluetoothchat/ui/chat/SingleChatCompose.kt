@@ -268,7 +268,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                     ) {
                         Row() {
                             IconButton(
-                                onClick = { navController.navigate(Screen.DrawingPad.route) },
+                                onClick = { navController.navigate(Screen.DrawingPad.route)
+                                          model.uploadingImage=true},
                                 modifier = Modifier
                                     .height(60.dp)
                                     .width(60.dp)
@@ -446,7 +447,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                 IconButton(
                     onClick = {
                         if(!model.mSending.value!!){
-                        model.sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, text, "")
+                        model.sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, text, "", "0")
                         text = ""
                         } else {
                             Toast.makeText(context, "sending message", Toast.LENGTH_SHORT).show()

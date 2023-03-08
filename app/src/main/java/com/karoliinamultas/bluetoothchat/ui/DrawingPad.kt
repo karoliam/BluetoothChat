@@ -43,6 +43,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.io.ByteArrayOutputStream
+import java.util.*
 
 
 data class PathState(
@@ -102,7 +103,7 @@ fun DrawingPad(context: Context, navController: NavController, model: MyViewMode
             }
     ) {
         Column{
-            PaintBody(path, context, drawColor, drawBrush, model, mBluetoothAdapter )
+            PaintBody(path, context, drawColor, drawBrush, model, mBluetoothAdapter, navController )
         }
     }
 }
@@ -223,7 +224,7 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
 
 @Composable
 // Uses path of type Path state to listen to all location on the screen drawn
-fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter) {
+fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter, navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -234,7 +235,8 @@ fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, draw
             path.value,
             context,
             model,
-            mBluetoothAdapter
+            mBluetoothAdapter,
+            navController
         )
     }
 }
@@ -251,7 +253,8 @@ fun DrawingCanvas(
     path: MutableList<PathState>,
     context: Context,
     model: MyViewModel,
-    mBluetoothAdapter: BluetoothAdapter
+    mBluetoothAdapter: BluetoothAdapter,
+    navController: NavController
 ) {
     val currentPath = path.last().path
     val movePath = remember { mutableStateOf<Offset?>(null) }
@@ -310,10 +313,18 @@ Column(
     verticalArrangement = Arrangement.Bottom,
     horizontalAlignment = Alignment.End){
     FloatingActionButton(
-        onClick = { captureController.capture() },
+        onClick = { captureController.capture()
+                  },
         modifier = Modifier.padding(24.dp)) {
-        Text(text = "Save")
+        Text(text = "Preview")
+        LaunchedEffect(model.uploadingImage) {
+            if(!model.uploadingImage) {
+
+                navController.navigate(Screen.ChatWindow.route)
+            }
+        }
     }
+
 }
     // When Ticket's Bitmap image is captured, show preview in dialog
     canvasBitmap?.let { bitmap ->
@@ -324,7 +335,7 @@ Column(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Preview of Canvas image \uD83D\uDC47")
+                Text("Preview", color = Color.Black )
                 Spacer(Modifier.size(16.dp))
 
                 Image(
@@ -344,20 +355,14 @@ Column(
                     GlobalScope.launch(Dispatchers.IO) {
                         val byteArray = viewModel.bitmapToByteArray(bitmap.asAndroidBitmap())
                         Log.d("DBG", "byteArray before compress ${byteArray.size}")
-                        val compressed = viewModel.compressByteArray(byteArray)
-                        model.compressedBitmap.postValue(compressed)
-                        model.chopImage(compressed, mBluetoothAdapter)
 
-                        Log.d("DBG", "compress ${compressed.size}")
-                        val decompressed = viewModel.decompressByteArray(compressed)
-                        Log.d("DBG", "decompressed ${decompressed.size}")
-                        val byteArrayToBitmapDeCompressed = BitmapFactory.decodeByteArray(decompressed, 0, decompressed.size)
-                        compressedBitmap.value =  byteArrayToBitmapDeCompressed
-                        Log.d("DBG", "final value ${viewModel.bitmapToByteArray(compressedBitmap.value).size}")
+                        model.uploadImage("6d207e02198a847aa98d0a2a901485a5",
+                            Base64.getEncoder().encodeToString(byteArray), "json", navController)
+
                     }
                 }
                 ) {
-                    Text("Close Preview")
+                    Text("Send image")
                 }
 
             }
