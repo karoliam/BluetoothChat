@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.karoliinamultas.bluetoothchat.BluetoothChatApplication
+import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 
 object AppViewModelProvider {
 
@@ -17,6 +18,11 @@ object AppViewModelProvider {
         initializer {
             MyViewModel(
                 bluetoothChatApplication().container.messagesRepository
+            )
+        }
+        initializer {
+            DrawingPadViewModel(
+                bluetoothChatApplication()
             )
         }
     }

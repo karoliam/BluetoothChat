@@ -67,6 +67,7 @@ import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.Dispatchers
 import com.karoliinamultas.bluetoothchat.data.Message
+import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 //import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,7 +81,13 @@ private const val TAG = "ChatCompose"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun ChatWindow(navController: NavController, notificationManagerWrapper: NotificationManagerWrapper, mBluetoothAdapter: BluetoothAdapter, model:MyViewModel){
+fun ChatWindow(navController: NavController,
+               notificationManagerWrapper: NotificationManagerWrapper,
+               mBluetoothAdapter: BluetoothAdapter,
+               model:MyViewModel,
+               imageModel: ImageViewModel,
+               drawingViewModel: DrawingPadViewModel
+){
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surface)
@@ -154,7 +161,7 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)) {
-                Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model, colorsOnOff)
+                Chats(Modifier, notificationManagerWrapper, navController,mBluetoothAdapter, model, colorsOnOff, imageModel, drawingViewModel)
             }
         }
     )
@@ -226,7 +233,15 @@ fun ShowChat(message: Message, modifier: Modifier = Modifier, colorsOnOff: Mutab
 
 
 @Composable
-fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: NotificationManagerWrapper, navController: NavController,mBluetoothAdapter: BluetoothAdapter, model: MyViewModel, colorsOnOff: MutableState<Boolean>) {
+fun Chats( modifier: Modifier = Modifier,
+           notificationManagerWrapper: NotificationManagerWrapper,
+           navController: NavController,
+           mBluetoothAdapter: BluetoothAdapter,
+           model: MyViewModel,
+           colorsOnOff: MutableState<Boolean>,
+           imageModel: ImageViewModel,
+           drawingViewModel: DrawingPadViewModel
+) {
 
 
     val inputvalue = remember { mutableStateOf(TextFieldValue()) }
@@ -239,13 +254,13 @@ fun Chats( modifier: Modifier = Modifier, notificationManagerWrapper: Notificati
             .fillMaxHeight(0.88f)){
             ChatsList(model, colorsOnOff = colorsOnOff, notificationManagerWrapper = notificationManagerWrapper)
         }
-        InputField( modifier, navController, mBluetoothAdapter, model)
+        InputField( modifier, navController, mBluetoothAdapter, model, imageModel, drawingViewModel)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel) {
+fun InputField( modifier: Modifier = Modifier, navController: NavController, mBluetoothAdapter: BluetoothAdapter, model: MyViewModel, imageModel: ImageViewModel, drawingViewModel: DrawingPadViewModel) {
     val context = LocalContext.current
     var text by rememberSaveable { mutableStateOf("") }
     //BotMenu
@@ -315,7 +330,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                     )
                                 }
                             )
-                            CameraButton(context)
+                            CameraButton(context, imageModel, drawingViewModel, model, navController)
                             GalleryButton(context)
                         }
                     }
@@ -518,7 +533,7 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
     val valueList by model.messages.collectAsState()
     val listState = rememberLazyListState()
 // Show notification when message is sent (NOW SENDS NOTIFICATION WHEN YOU SEND A MESSAGE AS WELL)
-        LaunchedEffect(valueList) {
+    LaunchedEffect(valueList) {
             if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
 //                notificationManagerWrapper.showNotification(

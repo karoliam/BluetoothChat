@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.decode.BitmapFactoryDecoder
+import com.karoliinamultas.bluetoothchat.ImageViewModel
 import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
@@ -55,7 +56,7 @@ data class PathState(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawingPad(context: Context, navController: NavController, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter) {
+fun DrawingPad(context: Context, navController: NavController, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter, viewModel: DrawingPadViewModel) {
     val drawColor = remember { mutableStateOf(Color.Magenta) }
     val drawBrush = remember { mutableStateOf(5f) }
     val path = remember { mutableStateOf(mutableListOf<PathState>()) }
@@ -103,7 +104,7 @@ fun DrawingPad(context: Context, navController: NavController, model: MyViewMode
             }
     ) {
         Column{
-            PaintBody(path, context, drawColor, drawBrush, model, mBluetoothAdapter, navController )
+            PaintBody(path, context, drawColor, drawBrush, model, mBluetoothAdapter, navController, viewModel)
         }
     }
 }
@@ -224,7 +225,7 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
 
 @Composable
 // Uses path of type Path state to listen to all location on the screen drawn
-fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter, navController: NavController) {
+fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, drawColor: MutableState<Color>, drawBrush: MutableState<Float>, model: MyViewModel, mBluetoothAdapter: BluetoothAdapter, navController: NavController, viewModel: DrawingPadViewModel) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -236,7 +237,8 @@ fun PaintBody(path: MutableState<MutableList<PathState>>, context: Context, draw
             context,
             model,
             mBluetoothAdapter,
-            navController
+            navController,
+            viewModel
         )
     }
 }
@@ -254,13 +256,13 @@ fun DrawingCanvas(
     context: Context,
     model: MyViewModel,
     mBluetoothAdapter: BluetoothAdapter,
-    navController: NavController
+    navController: NavController,
+    viewModel: DrawingPadViewModel
 ) {
     val currentPath = path.last().path
     val movePath = remember { mutableStateOf<Offset?>(null) }
     val captureController = rememberCaptureController()
     var canvasBitmap: ImageBitmap? by remember { mutableStateOf(null) }
-    val viewModel = DrawingPadViewModel(context)
     var compressedBitmap = remember { mutableStateOf(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)) }
     var isClicked = remember {mutableStateOf(false)}
     compressedBitmap.value = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true)

@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -34,11 +35,16 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
+import java.util.*
 
 private val REQUEST_CAMERA_PERMISSION = 1
 class ComposeFileProvider : FileProvider(
@@ -67,54 +73,102 @@ class ComposeFileProvider : FileProvider(
 
 
 
-
 @Composable
 fun CameraButton(
-    context: Context
+    context: Context,
+    model: ImageViewModel,
+    viewModel: DrawingPadViewModel,
+    myViewModel: MyViewModel,
+    navController: NavController
 ) {
-    var hasImage by remember {
-        mutableStateOf(false)
-    }
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
+//    var hasImage by remember {
+//        mutableStateOf(false)
+//    }
+//    var imageUri by remember {
+//        mutableStateOf<Uri?>(null)
+//    }
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            model.hasImage.value = uri != null
+            model.imageUri.value = uri
+        }
+    )
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            hasImage = success
+            model.hasImage.value = success
         }
     )
 
     val context = LocalContext.current
     val activity = LocalContext.current as Activity
-    IconButton(
-        onClick = {
-            val cameraPermission = Manifest.permission.CAMERA
-            if (ContextCompat.checkSelfPermission(context, cameraPermission) == PackageManager.PERMISSION_GRANTED) {
-                // Permission is already granted, launch the camera
-                val uri = ComposeFileProvider.getImageUri(context)
-                imageUri = uri
-                Log.d("uri", imageUri.toString())
-                cameraLauncher.launch(uri)
-            } else {
-                // Permission is not granted, request it
-                ActivityCompat.requestPermissions(activity, arrayOf(cameraPermission), REQUEST_CAMERA_PERMISSION)
-            }
-        },
-        modifier = Modifier
-            .height(60.dp)
-            .width(60.dp)
-            .padding(0.dp, 6.dp, 0.dp, 0.dp),
-        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
-        content = {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.photo_camera),
-                contentDescription = "Camera button"
-            )
+    Row(modifier = Modifier.fillMaxSize()) {
+
+
+    if(model.imageUri.value != null && model.hasImage.value) {
+
+//        // 5
+//        AsyncImage(
+//            model = model.imageUri.value,
+//            modifier = Modifier.fillMaxWidth(),
+//            contentDescription = "Selected image",
+//        )
+        LaunchedEffect(key1 = 1) {
+            val byteArray = viewModel.bitmapToByteArray(model.bitmapImage())
+            Log.d("DBG", "byteArray before compress ${byteArray.size}")
+            myViewModel.uploadImage("6d207e02198a847aa98d0a2a901485a5",
+                Base64.getEncoder().encodeToString(byteArray), "json", navController)
+//            val bitmap = model.bitmapImage()
         }
-    )
+//
+//        Image(
+//            bitmap = bitmap.asImageBitmap(),
+//            contentDescription = "kuva",
+//            modifier = Modifier.fillMaxWidth()
+//        )
+    }
+
+
+        IconButton(
+            onClick = {
+                val cameraPermission = Manifest.permission.CAMERA
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        cameraPermission
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Permission is already granted, launch the camera
+                    val uri = ComposeFileProvider.getImageUri(context)
+                    model.imageUri.value = uri
+                    Log.d("uri", model.imageUri.toString())
+                    cameraLauncher.launch(uri)
+                } else {
+                    // Permission is not granted, request it
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(cameraPermission),
+                        REQUEST_CAMERA_PERMISSION
+                    )
+                }
+            },
+            modifier = Modifier
+                .height(60.dp)
+                .width(60.dp)
+                .padding(0.dp, 6.dp, 0.dp, 0.dp),
+            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.background),
+            content = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.photo_camera),
+                    contentDescription = "Camera button"
+                )
+            }
+        )
+    }
 }
+
+
 
 @Composable
 fun GalleryButton(

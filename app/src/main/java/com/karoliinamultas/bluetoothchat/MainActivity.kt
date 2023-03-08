@@ -21,16 +21,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import com.karoliinamultas.bluetoothchat.ui.DrawingPad
+import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 import com.karoliinamultas.bluetoothchat.ui.StartScreen
 import com.karoliinamultas.bluetoothchat.ui.chat.*
 import com.karoliinamultas.bluetoothchat.ui.theme.BluetoothChatTheme
@@ -45,7 +45,6 @@ private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE = 2
 private val REQUEST_IMAGE_CAPTURE = 3
 private lateinit var chatForegroundServiceIntent: Intent
-
 class MainActivity : ComponentActivity() {
     var mBluetoothAdapter: BluetoothAdapter? = null
 
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-
+        startForegroundService(chatForegroundServiceIntent)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
             val permission = arrayOf(Manifest.permission.BLUETOOTH)
@@ -69,6 +68,10 @@ class MainActivity : ComponentActivity() {
 //        startForegroundService(chatForegroundServiceIntent)
         setContent {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        val drawingViewModel: DrawingPadViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
+            val imageModel: ImageViewModel = viewModel()
+
             //Navia
             val navController = rememberNavController()
 
@@ -120,10 +123,10 @@ class MainActivity : ComponentActivity() {
                             ShowChats(navController = navController, mBluetoothAdapter!!, model)
                         }
                         composable(route = Screen.ChatWindow.route){
-                            ChatWindow(navController = navController, notificationManagerWrapper, mBluetoothAdapter!!, model)
+                            ChatWindow(navController = navController, notificationManagerWrapper, mBluetoothAdapter!!, model, imageModel, drawingViewModel)
                         }
                         composable(route = Screen.DrawingPad.route){
-                            DrawingPad(context, navController = navController, model, mBluetoothAdapter!!)
+                            DrawingPad(context, navController = navController, model, mBluetoothAdapter!!, drawingViewModel)
                         }
                     }
                 }
@@ -132,11 +135,7 @@ class MainActivity : ComponentActivity() {
 
         }
 
-    override fun onStart() {
-        super.onStart()
-        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-        startForegroundService(chatForegroundServiceIntent)
-    }
+
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onDestroy() {
     super.onDestroy()
@@ -157,7 +156,8 @@ class MainActivity : ComponentActivity() {
         }
         if (requestCode == REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+                startForegroundService(chatForegroundServiceIntent)
             }
         } else {
             // Permission is not granted, show a message to the user

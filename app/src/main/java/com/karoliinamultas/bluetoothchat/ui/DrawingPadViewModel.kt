@@ -1,11 +1,14 @@
 package com.karoliinamultas.bluetoothchat.ui
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.karoliinamultas.bluetoothchat.BluetoothChatApplication
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.format
 import id.zelory.compressor.constraint.quality
@@ -21,7 +24,7 @@ import java.util.zip.Deflater
 import java.util.zip.Inflater
 
 
-class DrawingPadViewModel(context: Context): ViewModel() {
+class DrawingPadViewModel(application: Application): AndroidViewModel(application) {
 
     fun compressByteArray(byteArray: ByteArray): ByteArray {
         val input = byteArray
@@ -76,7 +79,7 @@ class DrawingPadViewModel(context: Context): ViewModel() {
 //    }
 //    fun decompressByteArray
 
-    val context = context
+    val context = getApplication<BluetoothChatApplication>()
     suspend fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val actualFile = File(context.cacheDir, "drawing")
