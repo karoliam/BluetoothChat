@@ -250,7 +250,7 @@ fun Chats( modifier: Modifier = Modifier,
         }
         BottomNavigation(elevation = 0.dp, modifier = Modifier.fillMaxWidth().height(65.dp)) {
 
-            InputField(modifier = Modifier.weight(1f), navController, mBluetoothAdapter, model)
+            InputField(modifier = Modifier.weight(1f), navController, mBluetoothAdapter, model, imageModel, drawingViewModel)
         }
     }
 }
@@ -426,43 +426,35 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                         )
                     )
 
-                    IconButton(
-                        onClick = {
-                            if (!model.mSending.value!!) {
-                                model.sendMessage(
-                                    mBluetoothAdapter,
-                                    mBluetoothAdapter.bluetoothLeScanner,
-                                    text,
-                                    ""
-                                )
-                                text = ""
-                            } else {
-                                Toast.makeText(context, "sending message", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        },
+                    IconButton(onClick = {
+                        if (!model.mSending.value!!) {
+                            model.sendMessage(
+                                mBluetoothAdapter,
+                                mBluetoothAdapter.bluetoothLeScanner,
+                                text,
+                                "",
+                                "0"
+                            )
+                            text = ""
+                        } else {
+                            Toast.makeText(context, "sending message", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                         modifier = Modifier
-                            .height(50.dp)
-                            .width(50.dp)
-                            .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                            .align(CenterVertically)
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(100.dp)
-                            ),
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                            .height(60.dp)
+                            .width(60.dp)
+                            .padding(0.dp, 6.dp, 0.dp, 0.dp),
+                        colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                         content = {
                             Icon(
                                 imageVector = Icons.Filled.Send,
                                 modifier = Modifier
-                                    .padding(3.dp, 0.dp, 0.dp, 0.dp)
                                     .height(28.dp)
                                     .width(28.dp),
                                 contentDescription = "Localized description"
                             )
                         }
                     )
-
 
                 }
         }
