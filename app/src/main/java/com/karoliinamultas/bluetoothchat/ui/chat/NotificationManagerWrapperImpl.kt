@@ -18,9 +18,9 @@ class NotificationManagerWrapperImpl(private val context: Context) : Notificatio
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     override fun showNotification(title: String, message: String): Notification {
-        val channelId = "my_channel_id"
+        val channelId = "new_message_id"
         val channel =
-            NotificationChannel(channelId, "My Channel", NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(channelId, "New message", NotificationManager.IMPORTANCE_DEFAULT)
         notificationManager.createNotificationChannel(channel)
 
         val builder = Notification.Builder(context, channelId)

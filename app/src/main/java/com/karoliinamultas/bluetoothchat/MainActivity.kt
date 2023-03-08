@@ -43,14 +43,15 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE = 2
-private val REQUEST_IMAGE_CAPTURE = 1
+private val REQUEST_IMAGE_CAPTURE = 3
 private lateinit var chatForegroundServiceIntent: Intent
 
 class MainActivity : ComponentActivity() {
     var mBluetoothAdapter: BluetoothAdapter? = null
-    lateinit var model: MyViewModel
+
     @RequiresApi(Build.VERSION_CODES.P)
     @OptIn(ExperimentalMaterial3Api::class)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -59,14 +60,13 @@ class MainActivity : ComponentActivity() {
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
-            val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
+            val permission = arrayOf(Manifest.permission.BLUETOOTH)
             requestPermissions(permission, REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE)
-
         }
 
-//        model = MyViewModel(mBluetoothAdapter!!)
+//        startForegroundService(chatForegroundServiceIntent)
         setContent {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
             //Navia
@@ -88,7 +88,9 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.BLUETOOTH,
                             Manifest.permission.BLUETOOTH_ADMIN,
                             Manifest.permission.ACCESS_NETWORK_STATE,
-                            Manifest.permission.INTERNET
+                            Manifest.permission.INTERNET,
+                            Manifest.permission.FOREGROUND_SERVICE,
+                            Manifest.permission.POST_NOTIFICATIONS
                         )
                         .withListener(object : MultiplePermissionsListener {
                             override fun onPermissionsChecked(report: MultiplePermissionsReport) {
@@ -130,10 +132,16 @@ class MainActivity : ComponentActivity() {
 
         }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStart() {
+        super.onStart()
         chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
         startForegroundService(chatForegroundServiceIntent)
+    }
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun onDestroy() {
+    super.onDestroy()
+    val chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+    stopService(chatForegroundServiceIntent)
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -149,8 +157,7 @@ class MainActivity : ComponentActivity() {
         }
         if (requestCode == REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-                startForegroundService(chatForegroundServiceIntent)
+
             }
         } else {
             // Permission is not granted, show a message to the user

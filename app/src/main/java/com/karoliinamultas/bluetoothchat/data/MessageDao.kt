@@ -17,6 +17,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages")
     fun getChatMessages(): Flow<List<Message>>
 
+    @Query("Select message_uuid FROM messages")
+    fun getMessageUuids(): Flow<List<String>>
+
     @Query("DELETE FROM messages")
     suspend fun deleteAllChatMessages()
 

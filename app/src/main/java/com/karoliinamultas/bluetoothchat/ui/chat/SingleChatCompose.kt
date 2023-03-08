@@ -521,10 +521,10 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
         LaunchedEffect(valueList) {
             if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
-                notificationManagerWrapper.showNotification(
-                    "tossa on kissa",
-                    "kissakoira"
-                )
+//                notificationManagerWrapper.showNotification(
+//                    "tossa on kissa",
+//                    "kissakoira"
+//                )
                 listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
 
             }
