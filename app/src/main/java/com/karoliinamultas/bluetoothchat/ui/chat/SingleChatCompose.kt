@@ -2,6 +2,9 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 
 import android.bluetooth.BluetoothAdapter
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.DragInteraction
@@ -29,6 +32,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -36,8 +40,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -59,7 +65,11 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
+import java.net.URLEncoder
 
 
 private const val TAG = "ChatCompose"
@@ -147,8 +157,27 @@ fun ChatWindow(navController: NavController, notificationManagerWrapper: Notific
         }
     )
 }
-
-
+private suspend fun getImage(url: URL): Bitmap =
+    withContext(Dispatchers.IO) {
+        val myConn = url.openStream()
+        return@withContext BitmapFactory.decodeStream(myConn)
+    }
+@Composable
+fun ShowImage(urlText: URL) {
+    var savedBitmap by remember { mutableStateOf(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)) }
+    LaunchedEffect(urlText) {
+        savedBitmap = getImage(urlText)
+    }
+    Image(
+        bitmap = savedBitmap.asImageBitmap(),
+        contentDescription = "image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .size(56.dp)
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowChat(message:String, modifier: Modifier = Modifier, colorsOnOff: MutableState<Boolean>) {
@@ -353,26 +382,26 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
 //                disabledIndicatorColor = Color.Transparent)
 //            )
             Box(
-                    Modifier
-                        .drawWithCache {
-                            val offsetY = (-5).dp.toPx()
-                            val shadowColor = Color.Black
-                            val shadowAlpha = 0.3f
-                            val shadowBlur = 6.dp.toPx()
-                            onDrawWithContent {
-                                drawContent()
-                                drawRect(
-                                    shadowColor.copy(alpha = shadowAlpha),
-                                    Offset(0f, offsetY),
-                                    size = Size(size.width, shadowBlur),
-                                    alpha = shadowAlpha,
-                                    style = Fill
-                                )
-                            }
+                Modifier
+                    .drawWithCache {
+                        val offsetY = (-5).dp.toPx()
+                        val shadowColor = Color.Black
+                        val shadowAlpha = 0.3f
+                        val shadowBlur = 6.dp.toPx()
+                        onDrawWithContent {
+                            drawContent()
+                            drawRect(
+                                shadowColor.copy(alpha = shadowAlpha),
+                                Offset(0f, offsetY),
+                                size = Size(size.width, shadowBlur),
+                                alpha = shadowAlpha,
+                                style = Fill
+                            )
                         }
-                        .background(color = MaterialTheme.colorScheme.surface)
-                        .fillMaxWidth()
-                        .fillMaxHeight(1f)
+                    }
+                    .background(color = MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .fillMaxHeight(1f)
                         ) {
                     Row(
                         Modifier
@@ -499,10 +528,19 @@ fun ChatsList(model: MyViewModel/*messagesList: List<Message>*/, notificationMan
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)) {
             items(valueList?.size ?: 0) { index ->
+                val split = valueList?.get(index)!!.split(":")
+                Log.d("moi",split[0].toString())
+
+                if(!split.isNullOrEmpty()){
+                if(split[0] == "https"){
+//                    ShowImage(urlText = URL(valueList?.get(index)))
+                }
+                } else {
                 ShowChat(
                     valueList?.get(index).toString() ?: "viesti tuli perille ilman dataa",
                     colorsOnOff = colorsOnOff
                 )
+                }
             }
         }
 //    if(valueList!!.size > 0){
