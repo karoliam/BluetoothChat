@@ -113,7 +113,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
-                    messages.postValue(messages.value?.plus(splitMessage[3]))
+//                    messages.postValue(messages.value?.plus(splitMessage[3]))
                     uuids += splitMessage[1]
                     Log.d(
                         "hei",
