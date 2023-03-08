@@ -126,9 +126,7 @@ fun CameraButton(
     val activity = LocalContext.current as Activity
     Row(modifier = Modifier.fillMaxSize()) {
 
-
     if(model.imageUri.value != null && model.hasImage.value) {
-
 //        // 5
 //        AsyncImage(
 //            model = model.imageUri.value,
@@ -141,6 +139,7 @@ fun CameraButton(
             myViewModel.uploadImage("6d207e02198a847aa98d0a2a901485a5",
                 Base64.getEncoder().encodeToString(byteArray), "json", navController)
 //            val bitmap = model.bitmapImage()
+            model.hasImage.value = !model.hasImage.value
         }
 //
 //        Image(
