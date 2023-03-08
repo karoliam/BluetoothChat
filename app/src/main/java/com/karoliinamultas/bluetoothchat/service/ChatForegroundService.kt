@@ -15,14 +15,11 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
 import com.karoliinamultas.bluetoothchat.MyViewModel
-import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.data.BluetoothChatDatabase
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessageUuidsListUiState
 import com.karoliinamultas.bluetoothchat.data.OfflineMessagesRepository
-import com.karoliinamultas.bluetoothchat.service.ChatForegroundService.Companion.UUID_APP_SERVICE
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -199,7 +196,7 @@ class ChatForegroundService() : Service() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch {
             stopScan(bluetoothLeScanner)
             sendPackage.forEach {
                 delay(MyViewModel.MESSAGE_PERIOD / 2)
@@ -249,7 +246,7 @@ class ChatForegroundService() : Service() {
     fun stopScan(bluetoothLeScanner: BluetoothLeScanner) {
         fScanning.postValue(false)
         scanResults.postValue(mResults.values.toList())
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch {
             bluetoothLeScanner.stopScan(leScanCallback)
         }
     }
@@ -283,7 +280,7 @@ class ChatForegroundService() : Service() {
             return listOf(filter)
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch {
             fScanning.postValue(true)
 
             val settings = ScanSettings.Builder()

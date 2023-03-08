@@ -4,9 +4,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.NotificationCompat
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.service.ChatForegroundService.Companion.MESSAGE_NOTIFICATION_ID
 

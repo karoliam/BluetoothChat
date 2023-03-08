@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -58,14 +59,18 @@ class MainActivity : ComponentActivity() {
         mBluetoothAdapter = bluetoothManager.adapter
 
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
-        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-        startForegroundService(chatForegroundServiceIntent)
+//        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+//        startForegroundService(chatForegroundServiceIntent)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
             val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
             requestPermissions(permission, REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE)
 
         }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_SCAN), 101)
+        }
+
 
 //        startForegroundService(chatForegroundServiceIntent)
         setContent {
@@ -138,12 +143,12 @@ class MainActivity : ComponentActivity() {
         }
 
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    override fun onDestroy() {
-    super.onDestroy()
-    val chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-    stopService(chatForegroundServiceIntent)
-    }
+//    @RequiresApi(Build.VERSION_CODES.P)
+//    override fun onDestroy() {
+//    super.onDestroy()
+//    val chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+//    stopService(chatForegroundServiceIntent)
+//    }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
@@ -156,7 +161,7 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
             }
         }
-        if (requestCode == REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE) {
+        if (requestCode == 101) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
                 startForegroundService(chatForegroundServiceIntent)
