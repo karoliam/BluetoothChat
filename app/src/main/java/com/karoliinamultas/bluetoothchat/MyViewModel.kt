@@ -10,17 +10,19 @@ import android.content.Context
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
+import com.karoliinamultas.bluetoothchat.network.ImageApi
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,8 +35,14 @@ import java.util.*
 import kotlin.math.log
 
 private const val TAG = "MyViewModelTAG"
-
+class ImageRepository() {
+    private val call = ImageApi.service
+    suspend fun getPress(param1:String,param2:String,param3:String, ) = call.postData(param1, param2, param3)
+}
 class MyViewModel(private val messagesRepository: MessagesRepository) : ViewModel() {
+    private val repository: ImageRepository = ImageRepository()
+    var imageUrl: String by mutableStateOf("")
+        private set
 
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
@@ -56,6 +64,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     var scanResults = MutableLiveData<List<ScanResult>>(null)
     var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
     var compressedBitmap = MutableLiveData<ByteArray>()
+    var uploadingImage by mutableStateOf(true)
     // file recieving and sending stuff
     var fRecieving = MutableLiveData<Boolean>(false)
     var recievedPackages: Array<String> = arrayOf()
@@ -70,9 +79,22 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MAX)
         .setPrimaryPhy(BluetoothDevice.PHY_LE_1M)
         .setSecondaryPhy(BluetoothDevice.PHY_LE_2M)
-
+    val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
+        throwable.printStackTrace()
+    }
     //    callBack is what triggers when scanner found needed service uuid
 
+    fun uploadImage(param1: String, param2: String, param3:String, navController: NavController){
+        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler){
+            val responce = repository.getPress(param1, param2, param3)
+            imageUrl = responce.image.url
+            Log.d("url", imageUrl.toString())
+            sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, imageUrl, "", "1")
+            uploadingImage=false
+        }
+
+
+    }
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
@@ -91,10 +113,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
 
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
-                if (splitMessage[2] == "0") {
-
-//                    messages.postValue(messages.value?.plus(splitMessageToMessageObject))
-//                    messages.postValue(messages.value?.plus(splitMessage[3]))
+                    messages.postValue(messages.value?.plus(splitMessage[3]))
                     uuids += splitMessage[1]
                     Log.d(
                         "hei",
@@ -108,51 +127,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                             mBluetoothAdapter,
                             mBluetoothAdapter.bluetoothLeScanner,
                             splitMessage[3],
-                            splitMessage[1]
+                            splitMessage[1],
+                            splitMessage[2]
                         )
 
                     }
 
-                } else {
-                    Log.d(
-                        "files",
-                        "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]} the thing 3 ${splitMessage[3]} }"
-                    )
-                    val packageSize = splitMessage[2].split("/")
-//                    fRecieving.postValue(true)
-//                    if (fileInParts.size == 0) {
-//                        packageUUID = splitMessage[1]
-//                        fileInParts =
-//                            Array<ByteArray>(Integer.parseInt(packageSize[1]!!)) { i -> "".toByteArray() }
-//                    }
-//                    if (splitMessage[1] == packageUUID) {
-//                        fileInParts[Integer.parseInt(packageSize[0]) - 1] =
-//                            splitMessage[2].toByteArray()
-//                    }
-//                    if (packageSize?.get(0)!! == packageSize?.get(1)!!) {
-//                        fRecieving.postValue(false)
-//                        Log.d("file length", fileInParts[0].size.toString())
-//                        glueFileTogether(fileInParts)
-//                    }
-                    Log.d("package", "byteArray ${splitMessage[2]} the thing ${splitMessage[3]}")
-                    fRecieving.postValue(true)
-                    if (fileInParts.size == 0) {
-                        packageUUID = splitMessage[1]
-                        fileInParts =
-                            Array<ByteArray>(Integer.parseInt(packageSize[1]!!)) { i -> "".toByteArray() }
-                    }
-                    if (splitMessage[1] == packageUUID) {
-                        fileInParts[Integer.parseInt(packageSize[0]) - 1] =
-                            splitMessage[2].toByteArray(Charsets.UTF_8)
-                    }
 
-
-                    if (packageSize?.get(0)!! == packageSize?.get(1)!!) {
-                        fRecieving.postValue(false)
-                        Log.d("file length", fileInParts.size.toString())
-                        Log.d("stop", packageSize?.get(0).toString())
-                    }
-                }
             }
             }
 
@@ -238,12 +219,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         mBluetoothLeScanner.stopScan(leScanCallbackBeacons)
     }
 
-    fun chopImage(byteArray: ByteArray, mBluetoothAdapter: BluetoothAdapter) {
 
-        val byteArrays = divideArray(byteArray, 1000)
-        sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, "", "", byteArrays!!)
-
-    }
 
 
     fun divideArray(source: ByteArray, chunksize: Int): Array<ByteArray>? {
@@ -275,15 +251,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         bluetoothLeScanner: BluetoothLeScanner,
         message: String,
         uuid: String,
-        file: Array<ByteArray> = arrayOf()
+        isUrl:String
     ) {
         var buildMessage: String = ""
-        var sendPackage = file
         val leAdvertiser = mBluetoothAdapter.bluetoothLeAdvertiser
-        if (message != "") {
             if (uuid.isEmpty()) {
                 val uuidl = UUID.randomUUID().toString()
-                buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/0/*/" + message
+                buildMessage = beaconFilter.value + "/*/" + uuidl +  "/*/"+isUrl+"/*/" + message
                 uuids += uuidl
                 /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuidl,message,beaconFilter.value.toString(),true)))
@@ -297,7 +271,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                     )
                 }
             } else {
-                buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/0/*/" + message
+                buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/"+isUrl+"/*/" + message
                 uuids += uuid
                 /** maybe */
 //                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
@@ -311,33 +285,16 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                     )
                 }
             }
-            sendPackage = sendPackage.plus(buildMessage.toByteArray((Charsets.UTF_8)))
-        } else {
-            val uuidl = UUID.randomUUID().toString()
-            var packageIndex: Int = 0
-            sendPackage.forEach {
-                val messageFirstPart = (beaconFilter.value + "/*/" + uuidl + "/*/"+ (packageIndex + 1) + "/" + sendPackage.size.toString() + "/*/").toByteArray()
 
-                val result = ByteArray(messageFirstPart.size + it.size)
-                System.arraycopy(messageFirstPart, 0, result, 0, messageFirstPart.size)
-                System.arraycopy(it, 0, result, messageFirstPart.size, it.size)
-
-                Log.d("arrayLength", it.size.toString())
-                sendPackage[packageIndex] = result
-                packageIndex++
-            }
-        }
 
 
         viewModelScope.launch(Dispatchers.IO) {
                 stopScan(bluetoothLeScanner)
-            sendPackage.forEach {
-                delay(MESSAGE_PERIOD / 2)
                 val data = AdvertiseData.Builder()
                     .setIncludeDeviceName(true)
                     .addServiceData(
                         ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")),
-                        it
+                        buildMessage.toByteArray(Charsets.UTF_8)
                     )
                     .addServiceUuid(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
                     .build()
@@ -353,9 +310,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 )
                 delay(MESSAGE_PERIOD)
                 leAdvertiser.stopAdvertisingSet(callback)
-                Log.d("message", String(it, Charset.defaultCharset()))
+                Log.d("message", buildMessage)
                 mSending.postValue(false)
-            }
+
             scanDevices(bluetoothLeScanner)
         }
     }
