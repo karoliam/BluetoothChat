@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalFocusManager
@@ -88,6 +87,8 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.BLUETOOTH_SCAN,
                             Manifest.permission.BLUETOOTH,
                             Manifest.permission.BLUETOOTH_ADMIN,
+                            Manifest.permission.ACCESS_NETWORK_STATE,
+                            Manifest.permission.INTERNET
                         )
                         .withListener(object : MultiplePermissionsListener {
                             override fun onPermissionsChecked(report: MultiplePermissionsReport) {
@@ -131,8 +132,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-        startForegroundService(chatForegroundServiceIntent)
+//        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
+//        startForegroundService(chatForegroundServiceIntent)
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

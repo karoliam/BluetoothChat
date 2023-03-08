@@ -6,38 +6,36 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.twotone.Call
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
+
 
 private val REQUEST_CAMERA_PERMISSION = 1
 class ComposeFileProvider : FileProvider(
@@ -65,6 +63,7 @@ class ComposeFileProvider : FileProvider(
 
 @Composable
 fun ShowImage(urlText: URL) {
+    Log.d("moi", urlText.toString())
     var savedBitmap by remember { mutableStateOf(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)) }
     LaunchedEffect(urlText) {
         savedBitmap = getImage(urlText)
@@ -86,9 +85,11 @@ private suspend fun getImage(url: URL): Bitmap =
     }
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun CameraButton(
     context: Context
+,model: MyViewModel
 ) {
     var hasImage by remember {
         mutableStateOf(false)
@@ -101,6 +102,7 @@ fun CameraButton(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             hasImage = success
+            Log.d("string", imageUri.toString())
         }
     )
 
@@ -113,7 +115,9 @@ fun CameraButton(
                 // Permission is already granted, launch the camera
                 val uri = ComposeFileProvider.getImageUri(context)
                 imageUri = uri
+                Log.d("uri", imageUri.toString())
                 cameraLauncher.launch(uri)
+//                ShowImage(urlText = URL(imageUri.toString()))
             } else {
                 // Permission is not granted, request it
                 ActivityCompat.requestPermissions(activity, arrayOf(cameraPermission), REQUEST_CAMERA_PERMISSION)
