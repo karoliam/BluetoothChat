@@ -101,12 +101,6 @@ fun CameraButton(
     myViewModel: MyViewModel,
     navController: NavController
 ) {
-//    var hasImage by remember {
-//        mutableStateOf(false)
-//    }
-//    var imageUri by remember {
-//        mutableStateOf<Uri?>(null)
-//    }
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -127,26 +121,16 @@ fun CameraButton(
     Row(modifier = Modifier.fillMaxSize()) {
 
     if(model.imageUri.value != null && model.hasImage.value) {
-//        // 5
-//        AsyncImage(
-//            model = model.imageUri.value,
-//            modifier = Modifier.fillMaxWidth(),
-//            contentDescription = "Selected image",
-//        )
+
         LaunchedEffect(key1 = 1) {
             val byteArray = viewModel.bitmapToByteArray(model.bitmapImage())
             Log.d("DBG", "byteArray before compress ${byteArray.size}")
             myViewModel.uploadImage("6d207e02198a847aa98d0a2a901485a5",
                 Base64.getEncoder().encodeToString(byteArray), "json", navController)
-//            val bitmap = model.bitmapImage()
+
             model.hasImage.value = !model.hasImage.value
         }
-//
-//        Image(
-//            bitmap = bitmap.asImageBitmap(),
-//            contentDescription = "kuva",
-//            modifier = Modifier.fillMaxWidth()
-//        )
+
     }
 
 

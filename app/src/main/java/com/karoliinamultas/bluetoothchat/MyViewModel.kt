@@ -108,9 +108,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
             )
 
-            /** maybe */
-            val splitMessageToMessageObject: Message = Message(splitMessage[1],splitMessage[2],splitMessage[0],false)
-
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
                 Log.d("message content", splitMessage.size.toString())
 //                    messages.postValue(messages.value?.plus(splitMessage[3]))
@@ -130,13 +127,9 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         splitMessage[1],
                         splitMessage[2]
                     )
-
                 }
-
-
             }
         }
-
     }
 
 
@@ -189,9 +182,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         @SuppressLint("SuspiciousIndentation")
         fun buildScanFilters(): List<ScanFilter> {
             val builder = ScanFilter.Builder()
-//            builder.setServiceUuid(ParcelUuid(UUID_APP_SERVICE))
-//            builder.setServiceData(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
-//            builder.setDeviceName("Nova1")
             val filter = builder.build()
             return listOf(filter)
         }
@@ -273,9 +263,7 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         } else {
             buildMessage = beaconFilter.value + "/*/" + uuid +  "/*/"+isUrl+"/*/" + message
             uuids += uuid
-            /** maybe */
-//                messages.postValue(messages.value?.plus(Message(uuid,message,beaconFilter.value.toString(), false)))
-//                messages.postValue(messages.value?.plus(message))
+
             viewModelScope.launch {
                 saveMessageToDatabase(
                     uuid,
@@ -329,8 +317,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         fun buildScanFilters(): List<ScanFilter> {
             val builder = ScanFilter.Builder()
             builder.setServiceUuid(ParcelUuid(UUID_APP_SERVICE))
-//            builder.setServiceData(ParcelUuid(UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")))
-//            builder.setDeviceName("PAVEL")
             val filter = builder.build()
             return listOf(filter)
         }

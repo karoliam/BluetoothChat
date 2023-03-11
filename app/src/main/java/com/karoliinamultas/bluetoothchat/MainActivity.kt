@@ -59,8 +59,7 @@ class MainActivity : ComponentActivity() {
         mBluetoothAdapter = bluetoothManager.adapter
 
         val notificationManagerWrapper = NotificationManagerWrapperImpl(this)
-//        chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-//        startForegroundService(chatForegroundServiceIntent)
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted, ask for permission
             val permission = arrayOf(Manifest.permission.FOREGROUND_SERVICE)
@@ -71,8 +70,6 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_SCAN), 101)
         }
 
-
-//        startForegroundService(chatForegroundServiceIntent)
         setContent {
         val model: MyViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val drawingViewModel: DrawingPadViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -142,13 +139,6 @@ class MainActivity : ComponentActivity() {
 
         }
 
-
-//    @RequiresApi(Build.VERSION_CODES.P)
-//    override fun onDestroy() {
-//    super.onDestroy()
-//    val chatForegroundServiceIntent = Intent(this, ChatForegroundService::class.java)
-//    stopService(chatForegroundServiceIntent)
-//    }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
