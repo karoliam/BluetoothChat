@@ -38,4 +38,8 @@ We hope you'll enjoy our Restroom Chat App as much as we do. It's a fun and crea
 <img src="https://user-images.githubusercontent.com/77148896/224572368-4d66466f-a028-40ba-8c36-c765798dbfeb.png" width=250 height=500></img>
 <img src="https://user-images.githubusercontent.com/77148896/224572394-f2d7d451-d1ec-47b3-8ded-71c6827a0543.png" width=250 height=500></img>
 
-
+## Authors
+Karoliina Multas
+Vili Mäkinen
+Konsta Perttilä
+Pavel Kozyar
