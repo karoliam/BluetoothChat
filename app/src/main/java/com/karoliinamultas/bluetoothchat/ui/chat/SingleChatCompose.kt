@@ -1,12 +1,8 @@
 package com.karoliinamultas.bluetoothchat.ui.chat
 
 
-//import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import android.bluetooth.BluetoothAdapter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
@@ -18,8 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.Card
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -35,15 +29,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +43,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -68,21 +55,9 @@ import coil.request.ImageRequest
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.karoliinamultas.bluetoothchat.*
 import com.karoliinamultas.bluetoothchat.R
-import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
 import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
-//import com.karoliinamultas.bluetoothchat.service.ChatForegroundService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
-
-
-private const val TAG = "ChatCompose"
-
 
 @RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -104,10 +79,6 @@ fun ChatWindow(navController: NavController,
 
     // Colors on off
     var colorsOnOff = remember { mutableStateOf(false) }
-
-
-    // fetching local context
-    val mContext = LocalContext.current
 
     //Joined chatname
     val chatName = model.beaconFilter.observeAsState()
@@ -164,26 +135,6 @@ fun ChatWindow(navController: NavController,
         })
 }
 
-private suspend fun getImage(url: URL): Bitmap = withContext(Dispatchers.IO) {
-    val myConn = url.openStream()
-    return@withContext BitmapFactory.decodeStream(myConn)
-}
-fun getBitmapFromURL(src: String?): Bitmap? {
-    return try {
-
-
-        val url = URL(src)
-        val connection: HttpURLConnection = url
-            .openConnection() as HttpURLConnection
-        connection.setDoInput(true)
-        connection.connect()
-        val input: InputStream = connection.getInputStream()
-        BitmapFactory.decodeStream(input)
-    } catch (e: Exception) {
-        Log.d("vk21", e.toString())
-        null
-    }
-}
 @Composable
 fun ShowImage(urlText: String) {
 
@@ -277,11 +228,6 @@ fun Chats( modifier: Modifier = Modifier,
            imageModel: ImageViewModel,
            drawingViewModel: DrawingPadViewModel
 ) {
-
-
-    val inputvalue = remember { mutableStateOf(TextFieldValue()) }
-
-
     Column(modifier = Modifier.fillMaxSize()) {
 
         Surface(modifier = Modifier
@@ -426,10 +372,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 )
                                 IconButton(
                                     onClick = {
-                                        Log.d(
-                                            "Hitoo",
-                                            isVisible.toString()
-                                        ); coroutineScope.launch {
+                                        coroutineScope.launch {
                                         if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
                                             bottomSheetScaffoldState.bottomSheetState.expand()
                                         } else {
@@ -524,11 +467,7 @@ fun ChatsList(
     LaunchedEffect(valueList) {
             if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
-//                notificationManagerWrapper.showNotification(
-//                    "tossa on kissa",
-//                    "kissakoira"
-//                )
-                listState.scrollToItem(valueList.messagesDatabaseList?.lastIndex ?: 0)
+                listState.scrollToItem(valueList.messagesDatabaseList.lastIndex ?: 0)
 
         }
     }
@@ -538,9 +477,9 @@ fun ChatsList(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        items(valueList.messagesDatabaseList?.size ?: 0) { index ->
+        items(valueList.messagesDatabaseList.size ?: 0) { index ->
             ShowChat(
-                valueList.messagesDatabaseList?.get(index) ?: Message(
+                valueList.messagesDatabaseList.get(index) ?: Message(
                     "", "viesti tuli perille ilman dataa", "", false
                 ), colorsOnOff = colorsOnOff
             )

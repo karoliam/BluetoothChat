@@ -32,10 +32,6 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
     //Statusbar
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surface)
-    // Create a boolean variable
-    // to store the display menu state
-
-    // fetching local context
 
     Scaffold(
         topBar = {
@@ -50,29 +46,6 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                         fontSize = 20.sp,
                     )
                 },
-//                actions = {
-//                    // Creating Icon button for dropdown menu
-//                    IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-//                        Icon(
-//                            imageVector = Icons.Filled.Menu,
-//                            contentDescription = "Menu button"
-//                        )
-//                    }
-//
-//                    DropdownMenu(
-//                        expanded = mDisplayMenu,
-//                        onDismissRequest = { mDisplayMenu = false }
-//                    ) {
-//                        // Creating dropdown menu item, on click
-//                        // would create a Toast message
-//                        androidx.compose.material.DropdownMenuItem(onClick = { Toast.makeText(mContext, "Settings", Toast.LENGTH_SHORT).show() }){
-//                            Text(text = "Settings")
-//                        }
-//                        androidx.compose.material.DropdownMenuItem(onClick = {  }){
-//                            Text(text = "About")
-//                        }
-//                    }
-//                },
             )
         },
         content = { innerPadding ->
@@ -91,17 +64,11 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
     @Composable
     fun ShowDevices(
         navController: NavController,
-        /*scanResults: Map<String, BluetoothDevice>,
-        onClick: (BluetoothDevice?) -> Unit*/
         mBluetoothAdapter: BluetoothAdapter,
         model : MyViewModel
     ) {
         val scanResults: Set<String>? by model.beacons.observeAsState()
 
-//        Button(onClick = {
-//            model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
-//            navController.navigate(Screen.ChatWindow.route)
-//                         }, Modifier.padding(40.dp)){ Text(text = "Dummy Button")}
         LazyColumn(
             modifier = Modifier
 
@@ -115,8 +82,6 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                                 model.beaconFilter.postValue(scanResults?.elementAt(index))
                                 model.scanDevices(mBluetoothAdapter.bluetoothLeScanner)
                                 model.stopScanBeacons(mBluetoothAdapter.bluetoothLeScanner)
-//                                model.messages.postValue(listOf())
-                                // delete other chat histories
                                 model.chatRoomOnJoinDatabaseChanges(scanResults?.elementAt(index).toString())
                                 navController.navigate(Screen.ChatWindow.route)
                             }
@@ -141,33 +106,6 @@ fun ShowChats(navController: NavController, mBluetoothAdapter: BluetoothAdapter,
                     }
                 }
             }
-//            itemsIndexed(scanResults.keys.toList()) { _, key ->
-//                Column {
-//                    Column(
-//                        modifier = Modifier
-//                            .clickable {
-//                                val device: BluetoothDevice? = scanResults.get(key = key)
-//                                onClick(device)
-//                            }
-//                            .background(color = randomBack, shape = RoundedCornerShape(10.dp))
-//                            .fillMaxWidth()
-//                            .padding(7.dp)
-//                    ) {
-//                        Text(
-//                            text = scanResults[key]?.name ?: "Unknown Device",
-//                            color = randomTeksti
-//                        )
-//                        Spacer(modifier = Modifier.size(10.dp))
-//                        Text(
-//                            text = scanResults[key]?.address ?: "",
-//                            fontWeight = FontWeight.Light,
-//                            color = randomTeksti
-//                        )
-//                    }
-//                    Spacer(modifier = Modifier.size(10.dp))
-//                }
-//            }
-//        }
         }
     }
         @SuppressLint("MissingPermission")

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.*
@@ -32,8 +31,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import coil.decode.BitmapFactoryDecoder
-import com.karoliinamultas.bluetoothchat.ImageViewModel
 import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.R
 import com.karoliinamultas.bluetoothchat.Screen
@@ -42,8 +39,6 @@ import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-import java.io.ByteArrayOutputStream
 import java.util.*
 
 
@@ -135,7 +130,6 @@ fun DrawingTools(drawColor: MutableState<Color>, drawBrush: MutableState<Float>,
         brownColor
     )
     val strokes = remember { (1..30 step 5).toList() }
-    var isClicked = remember { mutableStateOf(false)}
     val strokeMap: MutableMap<Int, Boolean> = remember {mutableStateMapOf()}
 
     fun addStrokesToMap() {
