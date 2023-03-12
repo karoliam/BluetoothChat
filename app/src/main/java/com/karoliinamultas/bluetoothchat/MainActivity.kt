@@ -130,10 +130,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                }
             }
-
         }
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -156,8 +155,7 @@ class MainActivity : ComponentActivity() {
             // Permission is not granted, show a message to the user
         }
     }
-
-    }
+}
 
 
 

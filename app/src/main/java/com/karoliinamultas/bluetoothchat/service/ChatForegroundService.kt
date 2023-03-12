@@ -3,23 +3,19 @@ package com.karoliinamultas.bluetoothchat.service
 import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.karoliinamultas.bluetoothchat.MyViewModel
 import com.karoliinamultas.bluetoothchat.data.BluetoothChatDatabase
-import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessageUuidsListUiState
 import com.karoliinamultas.bluetoothchat.data.OfflineMessagesRepository
 import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -30,17 +26,12 @@ import java.util.*
 
 class ChatForegroundService() : Service() {
 
-    lateinit var currentAdvertisingSet: AdvertisingSet
     private lateinit var context: Context
     private var mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     var beaconFilter = MutableLiveData<String>("")
     var uuids: List<String> = listOf("uuids")
     var fScanning = MutableLiveData<Boolean>(false)
     private lateinit var bluetoothManager: BluetoothManager
-    var mSending = MutableLiveData<Boolean>(false)
-    var scanResults = MutableLiveData<List<ScanResult>>(null)
-    private val mResults = HashMap<String, ScanResult>()
-
 
     companion object {
         const val MESSAGE_NOTIFICATION_ID = 3
@@ -55,15 +46,6 @@ class ChatForegroundService() : Service() {
                 started = SharingStarted.WhileSubscribed(5_000L),
                 initialValue = MessageUuidsListUiState()
             )
-
-
-    val parameters = AdvertisingSetParameters.Builder()
-        .setLegacyMode(false)
-        .setInterval(AdvertisingSetParameters.INTERVAL_LOW)
-        .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_MAX)
-        .setPrimaryPhy(BluetoothDevice.PHY_LE_1M)
-        .setSecondaryPhy(BluetoothDevice.PHY_LE_2M)
-
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -96,11 +78,6 @@ class ChatForegroundService() : Service() {
                 serviceData ?: "".toByteArray(),
                 Charset.defaultCharset()
             ).split("/*/")
-            Log.d(
-                "KAROLIINAKAROLININAINIFISK",
-                "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
-            )
-
 
             if(!messageUuids.value.uuidsDatabaseList.contains(splitMessage[1])){
                 // notifikaatio
@@ -113,23 +90,11 @@ class ChatForegroundService() : Service() {
                 // end of notifikaatio
             }
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
-                Log.d("message content", splitMessage.size.toString())
                 if (splitMessage[2] == "0") {
-
                     uuids += splitMessage[1]
-                    Log.d(
-                        "hei",
-                        String(
-                            serviceData ?: "t".toByteArray(Charsets.UTF_8),
-                            Charset.defaultCharset()
-                        )
-                    )
-
-
                 }
             }
         }
-
     }
 
     @SuppressLint("MissingPermission")

@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -75,7 +74,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler){
             val responce = repository.getPress(param1, param2, param3)
             imageUrl = responce.image.url
-            Log.d("url", imageUrl.toString())
             sendMessage(mBluetoothAdapter, mBluetoothAdapter.bluetoothLeScanner, imageUrl, "", "1")
             uploadingImage=false
         }
@@ -90,22 +88,10 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 serviceData ?: "".toByteArray(),
                 Charset.defaultCharset()
             ).split("/*/")
-            Log.d(
-                "package",
-                "byteArray ${splitMessage[0]} the thing 1 ${splitMessage[1]} the thing 2 ${splitMessage[2]}}"
-            )
 
             if (!uuids?.contains(splitMessage[1])!! && beaconFilter.value.equals(splitMessage[0]) && splitMessage.size > 1) {
-                Log.d("message content", splitMessage.size.toString())
-//                    messages.postValue(messages.value?.plus(splitMessage[3]))
                 uuids += splitMessage[1]
-                Log.d(
-                    "hei",
-                    String(
-                        serviceData ?: "t".toByteArray(Charsets.UTF_8),
-                        Charset.defaultCharset()
-                    )
-                )
+
                 if (!fRecieving.value!!) {
                     sendMessage(
                         mBluetoothAdapter,
@@ -129,7 +115,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                         result.scanRecord?.deviceName?.split("//")?.get(0) ?: "no beacons"
                     )
                 )
-                Log.d("beacon", "beacon found ${result.scanRecord?.deviceName}")
             }
         }
     }
@@ -139,15 +124,10 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             txPower: Int,
             status: Int
         ) {
-            Log.i(
-                "LOG_TAG", "onAdvertisingSetStarted(): txPower:" + txPower + " , status: "
-                        + status
-            )
             currentAdvertisingSet = advertisingSet
         }
 
         override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet) {
-            Log.i("LOG_TAG", "onAdvertisingSetStopped():")
         }
     }
 
@@ -177,7 +157,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 .build()
 
             bluetoothLeScanner.startScan(null, settings, leScanCallbackBeacons)
-
         }
     }
 
@@ -249,13 +228,11 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
             )
             delay(MESSAGE_PERIOD)
             leAdvertiser.stopAdvertisingSet(callback)
-            Log.d("message", buildMessage)
             mSending.postValue(false)
 
             scanDevices(bluetoothLeScanner)
         }
     }
-
 
     //    Scanner with settings to follow specifis service uuid
     @SuppressLint("MissingPermission")
@@ -286,7 +263,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 .build()
 
             bluetoothLeScanner.startScan(filterList, settings, leScanCallback)
-            Log.d("start", "Scanning")
         }
     }
 

@@ -4,7 +4,6 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 
@@ -34,8 +33,6 @@ class ImageViewModel(application: Application): AndroidViewModel(application) {
             val inputStream2 = context.contentResolver.openInputStream(imageUri.value!!)
             bitmap.value = BitmapFactory.decodeStream(inputStream2, null, options2)!!
             inputStream2?.close()
-            Log.d("kuva", "tos on bitmap $bitmap")
-
         }
         return bitmap.value
     }
