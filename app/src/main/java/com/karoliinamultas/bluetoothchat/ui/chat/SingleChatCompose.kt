@@ -3,7 +3,6 @@ package com.karoliinamultas.bluetoothchat.ui.chat
 
 import android.bluetooth.BluetoothAdapter
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -374,10 +372,7 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                 )
                                 IconButton(
                                     onClick = {
-                                        Log.d(
-                                            "Hitoo",
-                                            isVisible.toString()
-                                        ); coroutineScope.launch {
+                                        coroutineScope.launch {
                                         if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
                                             bottomSheetScaffoldState.bottomSheetState.expand()
                                         } else {
@@ -472,10 +467,6 @@ fun ChatsList(
     LaunchedEffect(valueList) {
             if (!valueList.messagesDatabaseList.isNullOrEmpty()) {
                 // Value list has changed, show a notification
-//                notificationManagerWrapper.showNotification(
-//                    "tossa on kissa",
-//                    "kissakoira"
-//                )
                 listState.scrollToItem(valueList.messagesDatabaseList.lastIndex ?: 0)
 
         }
