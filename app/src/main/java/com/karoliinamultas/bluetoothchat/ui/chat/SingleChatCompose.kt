@@ -377,8 +377,8 @@ fun InputField( modifier: Modifier = Modifier, navController: NavController, mBl
                                     )
                                 }
                             )
-                            CameraButton(context, imageModel, drawingViewModel, model, navController)
-                            GalleryButton(context)
+                            CameraButton( imageModel, drawingViewModel, model, navController)
+                            GalleryButton()
                         }
                     }
                 }

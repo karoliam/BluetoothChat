@@ -1,12 +1,9 @@
 package com.karoliinamultas.bluetoothchat
 
-import android.app.Application
-import android.bluetooth.BluetoothAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.karoliinamultas.bluetoothchat.BluetoothChatApplication
 import com.karoliinamultas.bluetoothchat.ui.DrawingPadViewModel
 
 object AppViewModelProvider {

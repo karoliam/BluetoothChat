@@ -2,17 +2,12 @@ package com.karoliinamultas.bluetoothchat
 
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
-import android.content.Context
-import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +16,6 @@ import com.karoliinamultas.bluetoothchat.data.Message
 import com.karoliinamultas.bluetoothchat.data.MessagesListUiState
 import com.karoliinamultas.bluetoothchat.data.MessagesRepository
 import com.karoliinamultas.bluetoothchat.network.ImageApi
-import com.karoliinamultas.bluetoothchat.ui.chat.NotificationManagerWrapperImpl
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,9 +26,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 import java.util.*
-import kotlin.math.log
 
-private const val TAG = "MyViewModelTAG"
 class ImageRepository() {
     private val call = ImageApi.service
     suspend fun getPress(param1:String,param2:String,param3:String, ) = call.postData(param1, param2, param3)
@@ -58,18 +50,13 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
                 initialValue = MessagesListUiState()
             )
     var uuids: List<String> = listOf("uuids")
-    private val mResults = java.util.HashMap<String, ScanResult>()
+    private val mResults = HashMap<String, ScanResult>()
     var fScanning = MutableLiveData<Boolean>(false)
     var mSending = MutableLiveData<Boolean>(false)
     var scanResults = MutableLiveData<List<ScanResult>>(null)
-    var dataToSend = MutableLiveData<ByteArray>("".toByteArray())
-    var compressedBitmap = MutableLiveData<ByteArray>()
     var uploadingImage by mutableStateOf(true)
     // file recieving and sending stuff
     var fRecieving = MutableLiveData<Boolean>(false)
-    var recievedPackages: Array<String> = arrayOf()
-    var packageUUID: String = ""
-    var fileInParts: Array<ByteArray> = arrayOf()
 
     // Create an AdvertiseData object to include data in the advertisement
 
@@ -164,16 +151,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
         }
     }
 
-    @SuppressLint("SuspiciousIndentation")
-    fun glueFileTogether(parts: Array<ByteArray>) {
-        var byteLength: Int = 0
-        parts.forEach {
-            byteLength += it.size
-        }
-
-        Log.d("glued", byteLength.toString())
-    }
-
     @SuppressLint("MissingPermission")
     fun scanBeacons(bluetoothLeScanner: BluetoothLeScanner) {
         var filterList: List<ScanFilter> = listOf()
@@ -207,32 +184,6 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     @SuppressLint("MissingPermission")
     fun stopScanBeacons(mBluetoothLeScanner: BluetoothLeScanner) {
         mBluetoothLeScanner.stopScan(leScanCallbackBeacons)
-    }
-
-
-
-
-    fun divideArray(source: ByteArray, chunksize: Int): Array<ByteArray>? {
-        val ret = Array(Math.ceil(source.size / chunksize.toDouble()).toInt()) {
-            ByteArray(
-                chunksize
-            )
-        }
-
-        var start = 0
-        var parts = 0
-        for (i in ret.indices) {
-            if (start + chunksize > source.size) {
-                System.arraycopy(source, start, ret[i], 0, source.size - start)
-            } else {
-                System.arraycopy(source, start, ret[i], 0, chunksize)
-            }
-            start += chunksize
-            parts++
-        }
-
-        return ret
-
     }
 
     @SuppressLint("MissingPermission", "SuspiciousIndentation")
@@ -349,12 +300,8 @@ class MyViewModel(private val messagesRepository: MessagesRepository) : ViewMode
     }
 
     companion object GattAttributes {
-        const val SCAN_PERIOD: Long = 10000
         const val MESSAGE_PERIOD: Long = 1000
-        const val STATE_CONNECTING = 1
-        const val STATE_CONNECTED = 2
         val UUID_APP_SERVICE = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
-        val UUID_APP_DATA = UUID.fromString("cc17cc5a-b1d6-11ed-afa1-0242ac120002")
     }
 
     suspend fun saveMessageToDatabase(

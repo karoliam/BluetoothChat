@@ -23,10 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.core.app.ActivityCompat
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,7 +40,6 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 
-private const val TAG = "MainActivityTAG"
 private val REQUEST_CAMERA_PERMISSION = 1
 private val REQUEST_FOREGROUND_SERVICE_PERMISSION_CODE = 2
 private val REQUEST_IMAGE_CAPTURE = 1

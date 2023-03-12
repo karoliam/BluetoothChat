@@ -5,12 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 
 class ImageViewModel(application: Application): AndroidViewModel(application) {
     var hasImage = mutableStateOf(false)
